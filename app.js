@@ -25,5 +25,11 @@ var app = new Vue({
             this.text = e.data
         });
         // Send message
+        bc.postMessage("This is a test!");
+    },
+    methods: {
+        but: function () {
+            this.message = Number(this.message) * 2
+        }
     }
-})
+});
