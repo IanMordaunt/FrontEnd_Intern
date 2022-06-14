@@ -10,3 +10,20 @@ Vue.component('ChildComponent', {
         console.log("CHILD MOUNTED")
     }
 });
+
+var app = new Vue({
+    el: '#app',
+    data: {
+        message: ''
+    },
+    created() {
+        console.log('app mounted')
+        const bc = new BroadcastChannel("dataShare");
+        // Handle incoming messages
+        bc.addEventListener('message', e => {
+            console.log(e.data);
+            this.text = e.data
+        });
+        // Send message
+    }
+})
