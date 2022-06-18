@@ -1,5 +1,6 @@
 <script setup>
 import Parent from './components/Parent.vue'
+import Buttons from './components/Buttons.vue'
 </script>
 
 <template>
@@ -12,7 +13,7 @@ import Parent from './components/Parent.vue'
   </header>
 
   <main>
-    <TheWelcome />
+    <Buttons />
   </main>
 </template>
 
