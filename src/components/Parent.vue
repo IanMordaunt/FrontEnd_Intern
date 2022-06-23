@@ -2,7 +2,7 @@
 export default {
   data() {
     return {
-      localMsg: 'John',
+      localMsg: 'View -1-',
     };
   },
   props: {
@@ -13,7 +13,7 @@ export default {
   },
   methods: {
     doIt() {
-      console.log(`Hello ${this.name}`);
+      console.log(`Hello ${this.localMsg}`);
     },
   },
   mounted() {

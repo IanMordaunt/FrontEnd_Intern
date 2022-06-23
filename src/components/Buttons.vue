@@ -2,7 +2,7 @@
 export default {
   data() {
     return {
-      localMsg: 'John',
+      totalValue: 0,
     };
   },
   props: {
@@ -12,9 +12,14 @@ export default {
     },
   },
   methods: {
-    doIt() {
-      console.log(`Hello ${this.name}`);
+    add() {
+      const addValue = 1;
+      this.totalValue += addValue;
     },
+    subtract() {
+      const subtractValue = 1;
+      this.totalValue -= subtractValue;
+    }
   },
   mounted() {
     const bc = new BroadcastChannel("dataShare");
@@ -31,10 +36,11 @@ export default {
 
 <template>
   <div class="greetings">
-    <div class="buttons">
-    <button>Add</button>
-    <button>Subtract</button>
-    </div>
+    <!-- <div class="buttons">
+    <button @click="add">Add</button>
+    <button @click="subtract">Subtract</button>
+    
+    </div> -->
     <h1 class="green">{{ msg }}</h1>
   </div>
 </template>

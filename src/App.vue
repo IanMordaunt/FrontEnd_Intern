@@ -8,7 +8,7 @@ import Buttons from './components/Buttons.vue'
     <img alt="Vue logo" class="logo" src="./assets/logo.svg" width="125" height="125" />
 
     <div class="wrapper">
-      <Parent msg="You did it!" />
+      <Parent msg="Simple Math" />
     </div>
   </header>
 
