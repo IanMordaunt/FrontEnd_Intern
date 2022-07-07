@@ -38,8 +38,8 @@ export default {
     // Get All Users
      getUsers() {
      db.collection('users').get().then(users => {
-      this.users.push(users)
-      console.log(users)
+      this.users = users
+      // console.log(users)
     })
     }
   },
