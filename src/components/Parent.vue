@@ -2,36 +2,68 @@
 export default {
   data() {
     return {
-      localMsg: 'View -1-',
+      newUser: "",
+      users: [],
     };
   },
-  props: {
-    msg: {
-      type: String,
-      default: 'This is a msg',
-    },
-  },
+
   methods: {
-    doIt() {
-      console.log(`Hello ${this.localMsg}`);
+
+    // Add a User
+    addUser() {
+      let newUser = {
+        id: Date.now(),
+        name: this.newUser,
+      };
+      this.users.push(newUser);
+      this.newUser = "";
+
+      db.collection("users").add(newUser);
     },
+
+    // Update a User
+    updateUser() {
+      db.collection("users").doc({ id: 1 }).update({
+        name: "Jet",
+      });
+    },
+
+    // Overwrite a User
+    overwriteUser() {
+      db.collection("users")
+        .doc({ id: 1 })
+        .set({ id: 4, name: "Gill", age: 18 });
+    },
+
+    // Get All Users
+     getUsers() {
+     db.collection('users').get().then(users => {
+      this.users.push(users)
+      console.log(users)
+    })
+    }
   },
+
   mounted() {
-    const bc = new BroadcastChannel("dataShare");
-    // Handle incoming messages
-    bc.addEventListener('message', e => {
-      console.log(e.data);
-      this.text = e.data
-    });
-    // Send message
-    bc.postMessage("This is a test!");
+
   },
 };
 </script>
 
 <template>
-  <div class="greetings">
-    <h3>{{ localMsg }}</h3>
-    <h1 class="green">{{ msg }}</h1>
-  </div>
+  <input
+    v-model="newUser"
+    @keyup.enter="addUser"
+    placeholder="Add new user"
+    filled
+  />
+
+  <button @click="addUser">Add User</button>
+  <button @click="updateUser">Update User</button>
+  <button @click="overwriteUser">Overwite User</button>
+  <button @click="getUsers">Get All User</button>
+
+  <ul>
+    <li v-for="user in users" :key="user.id">{{ user.name }}</li>
+  </ul>
 </template>
