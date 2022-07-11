@@ -20,12 +20,12 @@ export default {
       db.collection("users").add(newUser);
 
       //TODO: Setup version change ********************
-      
-      // this.getUsers();
+
+      this.getUsers();
 
       request.onupgradeneeded = function (e) {
-        let db = request.result,
-          store = db.createObjectStore("userStore", { keyPath: "uID" });
+        let db = e.target.result,
+          const objectStore = db.createObjectStore("userStore", { keyPath: "uID" });
       };
 
       request.onsuccess = function (e) {
