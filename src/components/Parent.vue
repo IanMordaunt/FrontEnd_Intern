@@ -8,7 +8,6 @@ export default {
   },
 
   methods: {
-
     // Add a User
     addUser() {
       let newUser = {
@@ -19,6 +18,23 @@ export default {
       this.newUser = "";
 
       db.collection("users").add(newUser);
+
+      //TODO: Setup version change ********************
+      
+      // this.getUsers();
+
+      request.onupgradeneeded = function (e) {
+        let db = request.result,
+          store = db.createObjectStore("userStore", { keyPath: "uID" });
+      };
+
+      request.onsuccess = function (e) {
+        db = request.result;
+
+        this.users.push(db.users);
+      };
+      //TODO: Setup version change *********************
+
     },
 
     // Update a User
@@ -36,17 +52,19 @@ export default {
     },
 
     // Get All Users
-     getUsers() {
-     db.collection('users').get().then(users => {
-      this.users.push(users)
-      console.log(users)
-    })
-    }
+    getUsers() {
+      db.collection("users")
+        .get()
+        .then((users) => {
+          this.users = users;
+          // console.log(users)
+        });
+    },
   },
 
-  mounted() {
+  watch: {},
 
-  },
+  mounted() {},
 };
 </script>
 
