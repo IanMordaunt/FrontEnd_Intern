@@ -17,7 +17,6 @@ export default {
 
     },
 
-
     // Get All Users
     getUsers() {
     const myContent = localStorage.getItem("myContent");
