@@ -10,61 +10,33 @@ export default {
   methods: {
     // Add a User
     addUser() {
-      let newUser = {
-        id: Date.now(),
-        name: this.newUser,
-      };
-      this.users.push(newUser);
-      this.newUser = "";
+      this.users = [...this.users, this.newUser]
+      console.log('new user', this.users)
 
-      db.collection("users").add(newUser);
-
-      //TODO: Setup version change ********************
-      
-      // this.getUsers();
-
-      request.onupgradeneeded = function (e) {
-        let db = request.result,
-          store = db.createObjectStore("userStore", { keyPath: "uID" });
-      };
-
-      request.onsuccess = function (e) {
-        db = request.result;
-
-        this.users.push(db.users);
-      };
-      //TODO: Setup version change *********************
+      localStorage.setItem("myContent", JSON.stringify({ users: this.users }));
 
     },
 
-    // Update a User
-    updateUser() {
-      db.collection("users").doc({ id: 1 }).update({
-        name: "Jet",
-      });
-    },
-
-    // Overwrite a User
-    overwriteUser() {
-      db.collection("users")
-        .doc({ id: 1 })
-        .set({ id: 4, name: "Gill", age: 18 });
-    },
 
     // Get All Users
     getUsers() {
-      db.collection("users")
-        .get()
-        .then((users) => {
-          this.users = users;
-          // console.log(users)
-        });
+    const myContent = localStorage.getItem("myContent");
+    const data = JSON.parse(myContent)
+    this.users = data.users
     },
   },
 
-  watch: {},
+  mounted() {
 
-  mounted() {},
+    this.getUsers()
+
+    window.onstorage = () => {
+      // When local storage changes, dump the list to
+      // the console.
+      this.getUsers()
+      console.log(JSON.parse(window.localStorage.getItem('myContent')));
+    };
+  },
 };
 </script>
 
@@ -77,11 +49,8 @@ export default {
   />
 
   <button @click="addUser">Add User</button>
-  <button @click="updateUser">Update User</button>
-  <button @click="overwriteUser">Overwite User</button>
-  <button @click="getUsers">Get All User</button>
 
   <ul>
-    <li v-for="user in users" :key="user.id">{{ user.name }}</li>
+    <li v-for="(user, index) in users" :key="index">{{ user }}</li>
   </ul>
 </template>
