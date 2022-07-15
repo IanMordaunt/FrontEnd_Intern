@@ -1,5 +1,5 @@
 <script>
-import json from "./jsonDataParent.json";
+import json from "./jsonDataChild.json";
 
 export default {
   data() {
@@ -7,7 +7,7 @@ export default {
       newUser: "",
       users: [],
       myJson: json,
-      version: 0
+      version: 0,
     };
   },
 
@@ -40,7 +40,7 @@ export default {
       const myData = localStorage.getItem("myData");
       const data = JSON.parse(myData);
       this.myJson = data.myJson;
-    }
+    },
   },
 
   mounted() {
@@ -76,7 +76,8 @@ export default {
   </div>
 
   <div>
-    <div v-for="(data, index) in myJson" :key="index"><p>{{ data.name }}</p></div>
-
+    <div v-for="(data, index) in myJson" :key="index">
+      <p>{{ data.name }}</p>
+    </div>
   </div>
 </template>

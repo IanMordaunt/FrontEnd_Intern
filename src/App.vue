@@ -7,6 +7,7 @@ import Parent from './components/Parent.vue'
 
     <div class="wrapper">
       <Parent />
+      <Child />
     </div>
   </header>
 
