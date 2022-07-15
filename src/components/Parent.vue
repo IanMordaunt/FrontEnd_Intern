@@ -4,93 +4,72 @@ import json from "../db.json";
 export default {
   data() {
     return {
-      newUser: "",
-      users: [],
-      myJson: json,
+      myJson: {},
       version: 0,
-      versionUpdate: [],
+      changedLocation: 'nowhere'
     };
   },
 
   methods: {
-    // Add a User
-    addUser() {
-      this.users = [...this.users, this.newUser];
-      console.log("new user", this.users);
 
-      localStorage.setItem("myContent", JSON.stringify({ users: this.users }));
-    },
-    // Add all JSON Data to Local Storage
-    addData() {
+    updateVersion() {
       this.version += 1;
+      this.changedLocation = "here"
       console.log("latest version:", this.version);
 
       console.log("new data", this.myJson);
 
       localStorage.setItem(
-        "myData",
-        JSON.stringify({ version: this.version, myJson: this.myJson })
+        "version",
+        JSON.stringify({ version: this.version })
       );
     },
 
-    // Get All Users
-    getUsers() {
-      const myContent = localStorage.getItem("myContent");
-      const data = JSON.parse(myContent);
-      this.users = data.users;
-    },
+    getVersion(){
+      const unparsedJson = localStorage.getItem("version");
+      const data = JSON.parse(unparsedJson);
+      console.log('get version', data)
 
-    getData() {
-      const myData = localStorage.getItem("myData");
-      const data = JSON.parse(myData);
-      this.myJson = data.myJson;
-    },
-  },
-  watch: {
-    myJson(curretVersion, updatedVersion) {
-      if (curretVersion.indexOf('data') > -1) {
-        this.addData();
-      }
-    },
+      return data?.version
+    }
   },
 
   mounted() {
-    // this.getUsers();
-    this.myJson;
-    this.getData();
+    this.myJson = JSON.parse(JSON.stringify(json))
+    if(this.getVersion() == null){
+      this.updateVersion()
+    }
+
+    this.version = this.getVersion()
 
     window.onstorage = () => {
-      // When local storage changes, dump the list to
-      // the console.
-      this.getUsers();
-      this.getData();
-      console.log(JSON.parse(window.localStorage.getItem("myContent")));
-      console.log(JSON.parse(window.localStorage.getItem("myData")));
+      console.log('VERSION CHANGED')
+      this.changedLocation = "there"
+      this.version = this.getVersion()
+
+    //  get data from indexedDB because that changed
     };
   },
 };
 </script>
 
 <template>
-  <input
-    v-model="newUser"
-    @keyup.enter="addUser"
-    placeholder="Add new user"
-    filled
-  />
 
-  <button @click="addUser">Add User</button>
-  <button @click="addData">Add Data</button>
-  <div>
-    <ul>
-      <li v-for="(user, index) in users" :key="index">{{ user }}</li>
-    </ul>
-  </div>
 
-  <div>
-    <!-- Added on-change event for change in JSON. -->
-    <div v-for="(data, index) in myJson" :key="index">
-      <p>{{ data }}</p>
-    </div>
-  </div>
+  <button @click="updateVersion()">Update Version</button>
+  {{version}}
+
+  <p>updated version: <strong>{{this.changedLocation}}</strong></p>
+<!--  <div>-->
+<!--    <ul>-->
+<!--      <li v-for="(user, index) in users" :key="index">{{ user }}</li>-->
+<!--    </ul>-->
+<!--  </div>-->
+
+<!--  <div>-->
+<!--    &lt;!&ndash; Added on-change event for change in JSON. &ndash;&gt;-->
+<!--    <div v-for="(data, index) in myJson" :key="index">-->
+<!--      <p>{{ data }}</p>-->
+<!--    </div>-->
+<!--  </div>-->
 </template>
