@@ -8,18 +8,11 @@ export default {
       users: [],
       myJson: json,
       version: 0,
-      versionUpdate: []
+      versionUpdate: [],
     };
   },
 
   methods: {
-    // TODO: Not catching the event....
-    onChange(event) {
-      versionUpdate = event.target.value;
-      console.log(event.target.value);
-    },
-    // TODO: Not catching the event....
-
     // Add a User
     addUser() {
       this.users = [...this.users, this.newUser];
@@ -30,7 +23,7 @@ export default {
     // Add all JSON Data to Local Storage
     addData() {
       this.version += 1;
-      console.log("latest version is", this.version);
+      console.log("latest version:", this.version);
 
       console.log("new data", this.myJson);
 
@@ -53,10 +46,18 @@ export default {
       this.myJson = data.myJson;
     },
   },
+  watch: {
+    myJson(curretVersion, updatedVersion) {
+      if (curretVersion.indexOf('data') > -1) {
+        this.addData();
+      }
+    },
+  },
 
   mounted() {
     // this.getUsers();
-    // this.getData();
+    this.myJson;
+    this.getData();
 
     window.onstorage = () => {
       // When local storage changes, dump the list to
@@ -88,11 +89,7 @@ export default {
 
   <div>
     <!-- Added on-change event for change in JSON. -->
-    <div
-      v-for="(data, index) in myJson"
-      :key="index"
-      @change="onChange($event)"
-    >
+    <div v-for="(data, index) in myJson" :key="index">
       <p>{{ data }}</p>
     </div>
   </div>
