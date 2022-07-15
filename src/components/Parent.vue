@@ -1,10 +1,11 @@
 <script>
-import json from "../db.json";
+import axios from "axios"
 
 export default {
   data() {
     return {
       myJson: {},
+      selection: [],
       version: 0,
       changedLocation: 'nowhere'
     };
@@ -31,11 +32,31 @@ export default {
       console.log('get version', data)
 
       return data?.version
+    },
+
+    async fetchData(){
+      try{
+        const res = await axios.get('http://localhost:5555/data')
+        console.log('response', res.data)
+        this.myJson = res.data
+      } catch (e) {
+        console.log('error', e)
+      }
+    },
+
+    createSelectionObject(){
+      this.selection = this.myJson.map((item) => {
+        return {id: item.id, selected: false}
+      })
     }
   },
 
-  mounted() {
-    this.myJson = JSON.parse(JSON.stringify(json))
+  async mounted() {
+    await this.fetchData()
+
+    this.createSelectionObject()
+
+
     if(this.getVersion() == null){
       this.updateVersion()
     }
@@ -60,16 +81,16 @@ export default {
   {{version}}
 
   <p>updated version: <strong>{{this.changedLocation}}</strong></p>
-<!--  <div>-->
-<!--    <ul>-->
-<!--      <li v-for="(user, index) in users" :key="index">{{ user }}</li>-->
-<!--    </ul>-->
-<!--  </div>-->
+  <div>
+    <ul>
+      <li v-for="(item, index) in myJson" :key="index">{{item.id}} - {{ item.text }}</li>
+    </ul>
+  </div>
 
-<!--  <div>-->
-<!--    &lt;!&ndash; Added on-change event for change in JSON. &ndash;&gt;-->
-<!--    <div v-for="(data, index) in myJson" :key="index">-->
-<!--      <p>{{ data }}</p>-->
-<!--    </div>-->
-<!--  </div>-->
+  <div>
+    <ul>
+      <li v-for="(item, index) in selection" :key="index">{{item.id}} - {{ item.selected }}</li>
+    </ul>
+  </div>
+  
 </template>
