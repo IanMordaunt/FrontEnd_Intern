@@ -48,6 +48,16 @@ export default {
       this.selection = this.myJson.map((item) => {
         return {id: item.id, selected: false}
       })
+    },
+
+    toggleItemSelection(id){
+      const foundItem = this.selection.find((item) => item.id === id)
+      foundItem.selected = !foundItem.selected
+    },
+
+    isActive(id){
+      const foundItem = this.selection.find((item) => item.id === id)
+      return foundItem.selected
     }
   },
 
@@ -89,8 +99,18 @@ export default {
 
   <div>
     <ul>
-      <li v-for="(item, index) in selection" :key="index">{{item.id}} - {{ item.selected }}</li>
+      <li v-for="(item, index) in selection" :key="index">
+        <button class="" type="button" @click="toggleItemSelection(item.id)" :class="{active: isActive(item.id) }">{{item.id}}</button>
+      </li>
     </ul>
   </div>
-  
+
 </template>
+
+<style>
+
+.active{
+  background-color:red;
+}
+
+</style>
