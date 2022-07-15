@@ -1,5 +1,5 @@
 <script>
-import json from "./jsonData.json";
+import json from "../db.json";
 
 export default {
   data() {
@@ -7,6 +7,8 @@ export default {
       newUser: "",
       users: [],
       myJson: json,
+      version: 0,
+      versionUpdate: [],
     };
   },
 
@@ -20,9 +22,15 @@ export default {
     },
     // Add all JSON Data to Local Storage
     addData() {
+      this.version += 1;
+      console.log("latest version:", this.version);
+
       console.log("new data", this.myJson);
 
-      localStorage.setItem("myData", JSON.stringify({ myJson: this.myJson }));
+      localStorage.setItem(
+        "myData",
+        JSON.stringify({ version: this.version, myJson: this.myJson })
+      );
     },
 
     // Get All Users
@@ -36,12 +44,20 @@ export default {
       const myData = localStorage.getItem("myData");
       const data = JSON.parse(myData);
       this.myJson = data.myJson;
-    }
+    },
+  },
+  watch: {
+    myJson(curretVersion, updatedVersion) {
+      if (curretVersion.indexOf('data') > -1) {
+        this.addData();
+      }
+    },
   },
 
   mounted() {
     // this.getUsers();
-    // this.getData();
+    this.myJson;
+    this.getData();
 
     window.onstorage = () => {
       // When local storage changes, dump the list to
@@ -72,7 +88,9 @@ export default {
   </div>
 
   <div>
-    <div v-for="(data, index) in myJson" :key="index"><p>{{ data.name }}</p></div>
-
+    <!-- Added on-change event for change in JSON. -->
+    <div v-for="(data, index) in myJson" :key="index">
+      <p>{{ data }}</p>
+    </div>
   </div>
 </template>

@@ -1,5 +1,6 @@
 <script setup>
 import Parent from './components/Parent.vue'
+// import Child from './components/Child.vue'
 </script>
 
 <template>
@@ -7,6 +8,7 @@ import Parent from './components/Parent.vue'
 
     <div class="wrapper">
       <Parent />
+      <!-- <Child /> -->
     </div>
   </header>
 
