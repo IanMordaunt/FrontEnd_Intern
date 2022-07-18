@@ -1,95 +1,123 @@
 <script>
-import json from "../db.json";
+import axios from "axios"
 
 export default {
   data() {
     return {
+
+      myJson: {},
+      selection: [],
+      version: 0,
+      changedLocation: 'nowhere'
+
      
       myJson: json,
       version: 0,
       
+
     };
   },
 
   methods: {
-    // Add a User
-    addUser() {
-      this.users = [...this.users, this.newUser];
-      console.log("new user", this.users);
 
-      localStorage.setItem("myContent", JSON.stringify({ users: this.users }));
-    },
-    // Add all JSON Data to Local Storage
-    addData() {
+    updateVersion() {
       this.version += 1;
+      this.changedLocation = "here"
       console.log("latest version:", this.version);
 
       console.log("new data", this.myJson);
 
       localStorage.setItem(
-        "myData",
-        JSON.stringify({ version: this.version, myJson: this.myJson })
+        "version",
+        JSON.stringify({ version: this.version })
       );
     },
 
-    // Get All Users
-    getUsers() {
-      const myContent = localStorage.getItem("myContent");
-      const data = JSON.parse(myContent);
-      this.users = data.users;
+    getVersion(){
+      const unparsedJson = localStorage.getItem("version");
+      const data = JSON.parse(unparsedJson);
+      console.log('get version', data)
+
+      return data?.version
     },
 
-    getData() {
-      const myData = localStorage.getItem("myData");
-      const data = JSON.parse(myData);
-      this.myJson = data.myJson;
-    },
-  },
-  watch: {
-    myJson(curretVersion, updatedVersion) {
-      if (curretVersion.indexOf('data') > -1) {
-        this.addData();
+    async fetchData(){
+      try{
+        const res = await axios.get('http://localhost:5555/data')
+        console.log('response', res.data)
+        this.myJson = res.data
+      } catch (e) {
+        console.log('error', e)
       }
     },
+
+    createSelectionObject(){
+      this.selection = this.myJson.map((item) => {
+        return {id: item.id, selected: false}
+      })
+    },
+
+    toggleItemSelection(id){
+      const foundItem = this.selection.find((item) => item.id === id)
+      foundItem.selected = !foundItem.selected
+    },
+
+    isActive(id){
+      const foundItem = this.selection.find((item) => item.id === id)
+      return foundItem.selected
+    }
   },
 
-  mounted() {
-    // this.getUsers();
-    this.myJson;
-    this.getData();
+  async mounted() {
+    await this.fetchData()
+
+    this.createSelectionObject()
+
+
+    if(this.getVersion() == null){
+      this.updateVersion()
+    }
+
+    this.version = this.getVersion()
 
     window.onstorage = () => {
-      // When local storage changes, dump the list to
-      // the console.
-      this.getUsers();
-      this.getData();
-      console.log(JSON.parse(window.localStorage.getItem("myContent")));
-      console.log(JSON.parse(window.localStorage.getItem("myData")));
+      console.log('VERSION CHANGED')
+      this.changedLocation = "there"
+      this.version = this.getVersion()
+
+    //  get data from indexedDB because that changed
     };
   },
 };
 </script>
 
 <template>
-  <input
-    v-model="newUser"
-    @keyup.enter="addUser"
-    placeholder="Add new user"
-    filled
-  />
 
-  <button @click="addUser">Add User</button>
-  <button @click="addData">Add Data</button>
+
+  <button @click="updateVersion()">Update Version</button>
+  {{version}}
+
+  <p>updated version: <strong>{{this.changedLocation}}</strong></p>
   <div>
     <ul>
-      <li v-for="(user, index) in users" :key="index">{{ user }}</li>
+      <li v-for="(item, index) in myJson" :key="index">{{item.id}} - {{ item.text }}</li>
     </ul>
   </div>
 
   <div>
-    <!-- Added on-change event for change in JSON. -->
-    <div v-for="(data, index) in myJson" :key="index">
-      <p>{{ data }}</p>
-    </div>
+    <ul>
+      <li v-for="(item, index) in selection" :key="index">
+        <button class="" type="button" @click="toggleItemSelection(item.id)" :class="{active: isActive(item.id) }">{{item.id}}</button>
+      </li>
+    </ul>
   </div>
+
 </template>
+
+<style>
+
+.active{
+  background-color:red;
+}
+
+</style>
