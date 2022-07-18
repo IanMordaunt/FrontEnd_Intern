@@ -4,10 +4,17 @@ import axios from "axios"
 export default {
   data() {
     return {
+
       myJson: {},
       selection: [],
       version: 0,
       changedLocation: 'nowhere'
+
+     
+      myJson: json,
+      version: 0,
+      
+
     };
   },
 
