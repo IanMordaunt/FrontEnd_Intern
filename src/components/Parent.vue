@@ -4,11 +4,10 @@ import json from "../db.json";
 export default {
   data() {
     return {
-      newUser: "",
-      users: [],
+     
       myJson: json,
       version: 0,
-      versionUpdate: [],
+      
     };
   },
 
