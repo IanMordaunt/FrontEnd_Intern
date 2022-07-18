@@ -1,5 +1,48 @@
 <script>
-import axios from "axios"
+import axios from "axios";
+// import indexedDB from "../utilities/indexedDB-helper";
+
+
+// Create IndexedDB - Set DB-Name and DB-Version
+const DB_NAME = 'stateManager'
+const DB_VERSION = 2
+const TABLE_NAME = 'selections'
+let DB
+
+
+const getDb = async () => new Promise((resolve, reject) => {
+  console.log('call get DB')
+  if (DB) {
+    console.log('exists')
+    resolve(DB)
+  }
+
+  const request = indexedDB.open(DB_NAME, DB_VERSION)
+  console.log("REQUEST", request)
+
+  request.onerror = (event) => {
+    console.log('DB ERROR', event)
+    reject(`Error ${event}`)
+  }
+
+  request.onsuccess = (event) => {
+    console.log('DB SUCCESS', event.target.result)
+    DB = event.target.result
+    resolve(DB)
+  }
+
+  request.onupgradeneeded = (event) => {
+    console.log('DB ON UPDATE NEEDED')
+    const db = (event.target).result
+    try {
+      db.deleteObjectStore(TABLE_NAME)
+    } catch {
+
+    }
+    db.createObjectStore(TABLE_NAME, { keyPath: 'selectionId' })
+  }
+});
+
 
 export default {
   data() {
@@ -8,13 +51,8 @@ export default {
       myJson: {},
       selection: [],
       version: 0,
-      changedLocation: 'nowhere'
-
-     
-      myJson: json,
-      version: 0,
+      changedLocation: 'nowhere',
       
-
     };
   },
 
@@ -69,9 +107,74 @@ export default {
   },
 
   async mounted() {
+
+const saveSelections = async (newSelections) => {
+const db = await getDb()
+  // eslint-disable-next-line no-async-promise-executor
+  return new Promise(async (resolve, reject) => {
+    try {
+      const trans = db.transaction(TABLE_NAME, 'readwrite')
+      const store = trans.objectStore(TABLE_NAME)
+
+      /* Remove observable data added by VUE
+    https://github.com/vuejs/Discussion/issues/292 */
+      // const cleanedUpData = JSON.parse(JSON.stringify(newSelections))
+
+      const note = {
+        selectionId: 2,
+        selectionList: [{id: 1, selected:true}]
+      }
+
+      console.log('ADD TO INDEXEDDB', note)
+      const result = await store.add(note)
+
+
+      // close database when transaction is complete
+      trans.oncomplete = () => {
+        db.close()
+      }
+
+      resolve(result)
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(`There was an error adding to drafts, ${error}`)
+      reject(error)
+    }
+  })
+};
+
+const getSelections = async (sessionId) => {
+  const db = await getDb()
+  let selections = {}
+
+  return new Promise((resolve, reject) => {
+    try {
+      const trans = db.transaction(TABLE_NAME, 'readonly')
+      const store = trans.objectStore(TABLE_NAME)
+      const request = store.get(sessionId)
+
+      // assign results to selections when request has been successful
+      request.onsuccess = (event) => {
+        selections = event.target.result ?? selections
+        resolve(selections)
+      }
+
+      // close db when request is complete
+      request.oncomplete = () => {
+        db.close()
+      }
+    } catch (error) {
+      // eslint-disable-next-line no-console
+      console.error(`There was an error accessing drafts, ${error}`)
+      reject(error)
+    }
+  })
+}
+
     await this.fetchData()
 
     this.createSelectionObject()
+   
 
 
     if(this.getVersion() == null){
@@ -86,6 +189,10 @@ export default {
       this.version = this.getVersion()
 
     //  get data from indexedDB because that changed
+saveSelections()
+    getSelections()
+
+    
     };
   },
 };

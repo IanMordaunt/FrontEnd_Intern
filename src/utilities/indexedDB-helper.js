@@ -1,6 +1,6 @@
 
 const DB_NAME = 'stateManager'
-const DB_VERSION = 6
+const DB_VERSION = 2
 const TABLE_NAME = 'selections'
 let DB
 
