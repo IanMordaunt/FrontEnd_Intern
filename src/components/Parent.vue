@@ -43,85 +43,15 @@ const getDb = async () => new Promise((resolve, reject) => {
   }
 });
 
-
-export default {
-  data() {
-    return {
-
-      myJson: {},
-      selection: [],
-      version: 0,
-      changedLocation: 'nowhere',
-      
-    };
-  },
-
-  methods: {
-
-    updateVersion() {
-      this.version += 1;
-      this.changedLocation = "here"
-      console.log("latest version:", this.version);
-
-      console.log("new data", this.myJson);
-
-      localStorage.setItem(
-        "version",
-        JSON.stringify({ version: this.version })
-      );
-    },
-
-    getVersion(){
-      const unparsedJson = localStorage.getItem("version");
-      const data = JSON.parse(unparsedJson);
-      console.log('get version', data)
-
-      return data?.version
-    },
-
-    async fetchData(){
-      try{
-        const res = await axios.get('http://localhost:5555/data')
-        console.log('response', res.data)
-        this.myJson = res.data
-      } catch (e) {
-        console.log('error', e)
-      }
-    },
-
-    createSelectionObject(){
-      this.selection = this.myJson.map((item) => {
-        console.log({id: item.id})
-        return {id: item.id, selected: false}
-        
-      })
-    },
-
-    toggleItemSelection(id){
-      const foundItem = this.selection.find(item => item.id === id)
-      foundItem.selected = !foundItem.selected
-    },
-
-    isActive(id){
-      const foundItem = this.selection.find(item => item.id === id)
-      return foundItem.selected
-    }
-  },
-
-  
-
-  async mounted() {
-
-
-const saveSelections = async (selection) => {
+const saveSelections = async (newSelections) => {
 const db = await getDb()
   // eslint-disable-next-line no-async-promise-executor
   return new Promise(async (resolve, reject) => {
     try {
  
      const note = {
-        selectionId: 7,
-        selectionList: JSON.parse(JSON.stringify(this.selection))
+        selectionId: 4,
+        selectionList: JSON.parse(JSON.stringify(newSelections))
       } 
 
       const trans = db.transaction(TABLE_NAME, 'readwrite')
@@ -158,7 +88,8 @@ const getSelections = async (selectionId) => {
     try {
       const trans = db.transaction(TABLE_NAME, 'readonly')
       const store = trans.objectStore(TABLE_NAME)
-      const request = store.get('selectionId')
+      const request = store.get(9)
+
 
       // assign results to selections when request has been successful
       request.onsuccess = (event) => {
@@ -178,6 +109,79 @@ const getSelections = async (selectionId) => {
   })
 };
 
+
+
+export default {
+  data() {
+    return {
+
+      myJson: {},
+      selection: [],
+      version: 0,
+      changedLocation: 'nowhere',
+      
+    };
+  },
+
+  methods: {
+
+    updateVersion() {
+      this.version += 1;
+      this.changedLocation = "here"
+      console.log("latest version:", this.version);
+
+      console.log("new data", this.myJson);
+
+      localStorage.setItem(
+        "version",
+        JSON.stringify({ version: this.version })
+      );
+    },
+
+    getVersion() {
+      const unparsedJson = localStorage.getItem("version");
+      const data = JSON.parse(unparsedJson);
+      console.log('get version', data)
+
+      return data?.version
+    },
+
+    async fetchData(){
+      try{
+        const res = await axios.get('http://localhost:5555/data')
+        console.log('response', res.data)
+        this.myJson = res.data
+      } catch (e) {
+        console.log('error', e)
+      }
+    },
+
+    createSelectionObject(){
+      this.selection = this.myJson.map((item) => {
+        console.log({id: item.id})
+        return {id: item.id, selected: false}
+        
+      })
+    },
+
+    toggleItemSelection(id){
+      const foundItem = this.selection.find(item => item.id === id)
+      foundItem.selected = !foundItem.selected
+      // saveSelections()
+    },
+
+    isActive(id){
+      const foundItem = this.selection.find(item => item.id === id)
+      return foundItem.selected
+    }
+  },
+
+  
+
+  async mounted() {
+
+
+
     await this.fetchData()
 
     this.createSelectionObject()
@@ -191,17 +195,18 @@ const getSelections = async (selectionId) => {
 
     this.version = this.getVersion()
 
-    window.onstorage = () => {
+    window.onstorage = async () => {
       console.log('VERSION CHANGED')
       this.changedLocation = "there"
       this.version = this.getVersion()
 
     //  get data from indexedDB because that changed
-saveSelections()
-    getSelections()
+    const newSelection =  await getSelections()
+    this.selection = newSelection.selectionList
 
-    
+//  saveSelections()
     };
+   
   },
 };
 </script>
