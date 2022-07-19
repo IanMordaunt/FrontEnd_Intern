@@ -91,28 +91,39 @@ export default {
 
     createSelectionObject(){
       this.selection = this.myJson.map((item) => {
+        console.log({id: item.id})
         return {id: item.id, selected: false}
+        
       })
     },
 
     toggleItemSelection(id){
-      const foundItem = this.selection.find((item) => item.id === id)
+      const foundItem = this.selection.find(item => item.id === id)
       foundItem.selected = !foundItem.selected
     },
 
     isActive(id){
-      const foundItem = this.selection.find((item) => item.id === id)
+      const foundItem = this.selection.find(item => item.id === id)
       return foundItem.selected
     }
   },
 
+  
+
   async mounted() {
 
-const saveSelections = async (newSelections) => {
+
+const saveSelections = async (selection) => {
 const db = await getDb()
   // eslint-disable-next-line no-async-promise-executor
   return new Promise(async (resolve, reject) => {
     try {
+ 
+     const note = {
+        selectionId: 7,
+        selectionList: JSON.parse(JSON.stringify(this.selection))
+      } 
+
       const trans = db.transaction(TABLE_NAME, 'readwrite')
       const store = trans.objectStore(TABLE_NAME)
 
@@ -120,13 +131,9 @@ const db = await getDb()
     https://github.com/vuejs/Discussion/issues/292 */
       // const cleanedUpData = JSON.parse(JSON.stringify(newSelections))
 
-      const note = {
-        selectionId: 2,
-        selectionList: [{id: 1, selected:true}]
-      }
-
+    
       console.log('ADD TO INDEXEDDB', note)
-      const result = await store.add(note)
+      const result = await store.put(note)
 
 
       // close database when transaction is complete
@@ -143,15 +150,15 @@ const db = await getDb()
   })
 };
 
-const getSelections = async (sessionId) => {
+const getSelections = async (selectionId) => {
   const db = await getDb()
-  let selections = {}
+  let selections = {} 
 
   return new Promise((resolve, reject) => {
     try {
       const trans = db.transaction(TABLE_NAME, 'readonly')
       const store = trans.objectStore(TABLE_NAME)
-      const request = store.get(sessionId)
+      const request = store.get('selectionId')
 
       // assign results to selections when request has been successful
       request.onsuccess = (event) => {
@@ -169,13 +176,14 @@ const getSelections = async (sessionId) => {
       reject(error)
     }
   })
-}
+};
 
     await this.fetchData()
 
     this.createSelectionObject()
+    // this.toggleItemSelection()
+    // this.isActive()
    
-
 
     if(this.getVersion() == null){
       this.updateVersion()
