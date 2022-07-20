@@ -1,31 +1,27 @@
 <script>
-import axios from "axios"
+import axios from "axios";
+import { saveSelections, getSelections } from "../utilities/indexedDB-helper";
 
 export default {
   data() {
     return {
-
       myJson: {},
       selection: [],
       version: 0,
-      changedLocation: 'nowhere'
-
-     
-      myJson: json,
-      version: 0,
-      
-
+      changedLocation: "nowhere",
     };
   },
 
   methods: {
+    openIt() {
+      const url = "new_url";
+      window.open(url);
+    },
 
     updateVersion() {
       this.version += 1;
-      this.changedLocation = "here"
+      this.changedLocation = "here";
       console.log("latest version:", this.version);
-
-      console.log("new data", this.myJson);
 
       localStorage.setItem(
         "version",
@@ -33,91 +29,104 @@ export default {
       );
     },
 
-    getVersion(){
+    getVersion() {
       const unparsedJson = localStorage.getItem("version");
       const data = JSON.parse(unparsedJson);
-      console.log('get version', data)
+      console.log("get version", data);
 
-      return data?.version
+      return data?.version;
     },
 
-    async fetchData(){
-      try{
-        const res = await axios.get('http://localhost:5555/data')
-        console.log('response', res.data)
-        this.myJson = res.data
+    async fetchData() {
+      try {
+        const res = await axios.get("http://localhost:5555/data");
+        console.log("response", res.data);
+        this.myJson = res.data;
       } catch (e) {
-        console.log('error', e)
+        console.log("error", e);
       }
     },
 
-    createSelectionObject(){
+    createSelectionObject() {
       this.selection = this.myJson.map((item) => {
-        return {id: item.id, selected: false}
-      })
+        console.log({ id: item.id });
+        return { id: item.id, selected: false };
+      });
     },
 
-    toggleItemSelection(id){
-      const foundItem = this.selection.find((item) => item.id === id)
-      foundItem.selected = !foundItem.selected
+    async toggleItemSelection(id) {
+      const foundItem = this.selection.find((item) => item.id === id);
+      foundItem.selected = !foundItem.selected;
+      await saveSelections(this.selection);
+      this.updateVersion();
     },
 
-    isActive(id){
-      const foundItem = this.selection.find((item) => item.id === id)
-      return foundItem.selected
-    }
+    isActive(id) {
+      const foundItem = this.selection.find((item) => item.id === id);
+      return foundItem.selected;
+    },
   },
 
   async mounted() {
-    await this.fetchData()
+    await this.fetchData();
 
-    this.createSelectionObject()
+    this.createSelectionObject();
 
-
-    if(this.getVersion() == null){
-      this.updateVersion()
+    if (this.getVersion() == null) {
+      this.updateVersion();
     }
 
-    this.version = this.getVersion()
+    this.version = this.getVersion();
 
-    window.onstorage = () => {
-      console.log('VERSION CHANGED')
-      this.changedLocation = "there"
-      this.version = this.getVersion()
+    window.onstorage = async () => {
+      console.log("VERSION CHANGED");
+      this.changedLocation = "there";
+      this.version = this.getVersion();
 
-    //  get data from indexedDB because that changed
+      try {
+        const newSelection = await getSelections();
+        this.selection = newSelection.selectionList;
+      } catch (e) {
+        console.log("ERROR", e);
+      }
     };
   },
 };
 </script>
 
 <template>
-
-
-  <button @click="updateVersion()">Update Version</button>
-  {{version}}
-
-  <p>updated version: <strong>{{this.changedLocation}}</strong></p>
+  <div>
+    <button @click="openIt()">New Window</button>
+  </div>
+  <p>
+    updated version: <strong>{{ this.changedLocation }}</strong>
+  </p>
   <div>
     <ul>
-      <li v-for="(item, index) in myJson" :key="index">{{item.id}} - {{ item.text }}</li>
+      <li v-for="(item, index) in myJson" :key="index">
+        {{ item.id }} - {{ item.text }}
+      </li>
     </ul>
   </div>
 
   <div>
     <ul>
       <li v-for="(item, index) in selection" :key="index">
-        <button class="" type="button" @click="toggleItemSelection(item.id)" :class="{active: isActive(item.id) }">{{item.id}}</button>
+        <button
+          class=""
+          type="button"
+          @click="toggleItemSelection(item.id)"
+          :class="{ active: isActive(item.id) }"
+        >
+          {{ item.id }}
+        </button>
       </li>
     </ul>
   </div>
-
 </template>
 
 <style>
-
-.active{
-  background-color:red;
+.active {
+  background-color: red;
 }
-
 </style>
