@@ -78,17 +78,22 @@ export default {
 
     this.version = this.getVersion();
 
-    window.onstorage = async () => {
-      console.log("VERSION CHANGED");
-      this.changedLocation = "there";
-      this.version = this.getVersion();
-
+    const updateSelection = async () => {
       try {
         const newSelection = await getSelections();
         this.selection = newSelection.selectionList;
       } catch (e) {
         console.log("ERROR", e);
       }
+    };
+
+    updateSelection()
+
+    window.onstorage = async () => {
+      console.log("VERSION CHANGED");
+      this.changedLocation = "there";
+      this.version = this.getVersion();
+      updateSelection()
     };
   },
 };
