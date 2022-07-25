@@ -1,24 +1,22 @@
 <script setup>
-import Parent from './components/Parent.vue'
-// import Child from './components/Child.vue'
+import Parent from "./components/Parent.vue";
+import Grid from "./components/Grid.vue";
 </script>
 
 <template>
   <header>
-
     <div class="wrapper">
       <Parent />
-      <!-- <Child /> -->
     </div>
   </header>
 
   <main>
-
+    <Grid />
   </main>
 </template>
 
 <style>
-@import './assets/base.css';
+@import "./assets/base.css";
 
 #app {
   max-width: 1280px;
