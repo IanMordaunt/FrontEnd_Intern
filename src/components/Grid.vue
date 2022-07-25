@@ -75,7 +75,6 @@ export default {
 
   methods: {
     async cellWasClicked(e) {
-      // Example of consuming Grid Event
       const cellValue = e.value;
       this.selection.push(cellValue);
       await saveSelections(this.selection);
@@ -107,11 +106,7 @@ export default {
       return data?.version;
     },
   },
-  async mounted() {
-    // await this.fetchData();
-
-    // this.createSelectionObject();
-
+  mounted() {
     if (this.getVersion() == null) {
       this.updateVersion();
     }
