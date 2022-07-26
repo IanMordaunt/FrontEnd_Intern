@@ -1,8 +1,10 @@
 <script>
 import axios from "axios";
+import Grid from "./Grid.vue";
 import { saveSelections, getSelections } from "../utilities/indexedDB-helper";
 
 export default {
+  components: {Grid},
   data() {
     return {
       myJson: {},
@@ -100,38 +102,41 @@ export default {
 </script>
 
 <template>
-  <div>
-    <button @click="openIt()">New Window</button>
-  </div>
-  <p>
-    updated version: <strong>{{ this.changedLocation }}</strong>
-  </p>
-  <div>
-    <ul>
-      <li v-for="(item, index) in myJson" :key="index">
-        {{ item.id }} - {{ item.text }}
-      </li>
-    </ul>
-  </div>
+  <div class="parent-wrapper">
 
-  <div>
-    <ul>
-      <li v-for="(item, index) in selection" :key="index">
-        <button
-          class=""
-          type="button"
-          @click="toggleItemSelection(item.id)"
-          :class="{ active: isActive(item.id) }"
-        >
-          {{ item.id }}
-        </button>
-      </li>
-    </ul>
+    <div class="left-side">
+      <div>
+        <button @click="openIt()">New Window</button>
+      </div>
+      <p>
+        updated version: <strong>{{ this.changedLocation }}</strong>
+      </p>
+      <div>
+        <ul>
+          <li v-for="(item, index) in myJson" :key="index">
+            {{ item.id }} - {{ item.text }}
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="right-side">
+      <Grid />
+    </div>
+
   </div>
 </template>
 
 <style>
 .active {
   background-color: red;
+}
+
+.parent-wrapper{
+  display: flex;
+}
+
+.right-side{
+  flex:1
 }
 </style>

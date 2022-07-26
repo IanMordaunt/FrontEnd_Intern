@@ -1,13 +1,6 @@
 
 
 <template>
-  <div>
-    <button @click="openIt()">New Window</button>
-  </div>
-  <p>
-    updated version: <strong>{{ this.changedLocation }}</strong>
-  </p>
-
   <button @click="deselectRows">deselect rows</button>
   <ag-grid-vue
     class="ag-theme-alpine"

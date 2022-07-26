@@ -1,18 +1,9 @@
 <script setup>
-// import Parent from "./components/Parent.vue";
-import Grid from "./components/Grid.vue";
+import Parent from "./components/Parent.vue";
 </script>
 
 <template>
-  <header>
-    <div class="wrapper">
-      <!-- <Parent /> -->
-    </div>
-  </header>
-
-  <main>
-    <Grid />
-  </main>
+   <Parent />
 </template>
 
 <style>
@@ -49,17 +40,6 @@ a,
 }
 
 @media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
-
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
-  }
-
   header {
     display: flex;
     place-items: center;
