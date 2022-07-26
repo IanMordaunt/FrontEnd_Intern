@@ -18,8 +18,7 @@
 
 <script>
 import { AgGridVue } from "ag-grid-vue3"; // the AG Grid Vue Component
-import { reactive, ref } from "vue";
-import axios from "axios";
+import { reactive, ref, onMounted } from "vue";
 // CSS
 import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
@@ -31,7 +30,7 @@ export default {
   components: {
     AgGridVue,
   },
-  setup() {
+  setup(props) {
     const gridApi = ref(null); // Optional - for accessing Grid's API
 
     // Obtain API from grid's onGridReady event
@@ -53,13 +52,13 @@ export default {
       flex: 1,
     };
 
+    onMounted(() => {
+      console.log('props', props.gridData)
+      rowData.value = props.gridData
+    });
+
     return {
-      // Version Change
-      version: 0,
-      changedLocation: "nowhere",
-      //   IndexedDB Data
       selection: [],
-      myJson: {},
       //   Grid Data
       onGridReady,
       columnDefs,
@@ -68,113 +67,32 @@ export default {
     };
   },
 
+  props: {
+    gridData: {
+      type: Array,
+      required: true
+    }
+  },
+
   methods: {
-    openIt() {
-      const url = "new_url";
-      window.open(url);
-    },
-
-    updateVersion() {
-      this.version += 1;
-      this.changedLocation = "here";
-      console.log("latest version:", this.version);
-
-      localStorage.setItem(
-        "version",
-        JSON.stringify({ version: this.version })
-      );
-    },
-
-    getVersion() {
-      const unparsedJson = localStorage.getItem("version");
-      const data = JSON.parse(unparsedJson);
-      console.log("get version", data);
-
-      return data?.version;
-    },
-
-    async fetchData() {
-      try {
-        const res = await fetch("http://localhost:5555/data")
-          .then((result) => result.json())
-          .then((remoteRowData) => (this.rowData.value = remoteRowData));
-        this.myJson = res;
-        // console.log("response", res);
-      } catch (e) {
-        console.log("ERROR", e);
-      }
-      console.log("myJson", this.myJson);
-    },
-
-    // async cellWasClicked(e) {
-    //   let cellValue = e.value;
-    //   this.selection.push(cellValue);
-    //   await saveSelections(this.selection);
-    //   this.updateVersion();
-    //   console.log("cell value - ", e.value);
-
-    //   this.toggleItemSelection();
-    // },
-
-    createSelectionObject() {
-      this.selection = this.myJson.map((item) => {
-        console.log({ id: item.id });
-        return { id: item.id, selected: false };
-      });
-    },
 
     async toggleItemSelection(event) {
         console.log('event', event)
         const id = event.data.id
-      const foundItem = this.selection.find((item) => item.id === id);
-      foundItem.selected = !foundItem.selected;
-      await saveSelections(this.selection);
-      this.updateVersion();
-    },
-
-    isActive(id) {
-      const foundItem = this.selection.find((item) => item.id === id);
-      return foundItem.selected;
+        this.$emit('selection-changed', id)
+      // const foundItem = this.selection.find((item) => item.id === id);
+      // foundItem.selected = !foundItem.selected;
+      // await saveSelections(this.selection);
+      // this.updateVersion();
     },
 
     deselectRows() {
       gridApi.value.deselectAll();
     },
   },
-
-  async mounted() {
-    await this.fetchData();
-
-    // this.createSelectionObject();
-
-    if (this.getVersion() == null) {
-      this.updateVersion();
-    }
-
-    this.version = this.getVersion();
-
-    const updateSelection = async () => {
-      try {
-        const newSelection = await getSelections();
-        if(!newSelection.length){
-            this.createSelectionObject()
-        } else {
-            this.selection = newSelection.selectionList;
-        }
-      } catch (e) {
-        console.log("ERROR", e);
-      }
-    };
-
-    updateSelection();
-
-    window.onstorage = async () => {
-      console.log("VERSION CHANGED");
-      this.changedLocation = "there";
-      this.version = this.getVersion();
-      updateSelection();
-    };
-  },
+  mounted() {
+    // console.log('grid api', gridApi)
+  }
 };
 </script>
 

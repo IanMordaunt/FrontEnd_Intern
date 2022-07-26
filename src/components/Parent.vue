@@ -7,7 +7,8 @@ export default {
   components: {Grid},
   data() {
     return {
-      myJson: {},
+      loaded: false,
+      myJson: [],
       selection: [],
       version: 0,
       changedLocation: "nowhere",
@@ -46,8 +47,14 @@ export default {
         this.myJson = res.data;
       } catch (e) {
         console.log("error", e);
+      } finally {
+        this.loaded = true
       }
     },
+
+    fetchColumns(){
+
+    }
 
     createSelectionObject() {
       this.selection = this.myJson.map((item) => {
@@ -67,12 +74,16 @@ export default {
       const foundItem = this.selection.find((item) => item.id === id);
       return foundItem.selected;
     },
+
+    gridSelectionChanged(id){
+      console.log('this changed', id)
+    }
   },
 
   async mounted() {
     await this.fetchData();
 
-    this.createSelectionObject();
+    // this.createSelectionObject();
 
     if (this.getVersion() == null) {
       this.updateVersion();
@@ -121,7 +132,12 @@ export default {
     </div>
 
     <div class="right-side">
-      <Grid />
+      <Grid
+        v-if="loaded"
+        :gridData="myJson"
+        :gridColumn=""
+        @selection-changed="gridSelectionChanged"
+      />
     </div>
 
   </div>
