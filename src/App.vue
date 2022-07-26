@@ -1,12 +1,12 @@
 <script setup>
-import Parent from "./components/Parent.vue";
+// import Parent from "./components/Parent.vue";
 import Grid from "./components/Grid.vue";
 </script>
 
 <template>
   <header>
     <div class="wrapper">
-      <Parent />
+      <!-- <Parent /> -->
     </div>
   </header>
 

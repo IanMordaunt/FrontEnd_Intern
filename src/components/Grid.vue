@@ -1,4 +1,7 @@
 <template>
+  <div>
+    <button @click="openIt()">New Window</button>
+  </div>
   <p>
     updated version: <strong>{{ this.changedLocation }}</strong>
   </p>
@@ -8,11 +11,11 @@
     class="ag-theme-alpine"
     style="height: 500px"
     :columnDefs="columnDefs.value"
-    :rowData="rowData.value"
+    :rowData="rowData.value" 
     :defaultColDef="defaultColDef"
     rowSelection="multiple"
     animateRows="true"
-    @cell-clicked="cellWasClicked"
+    @cell-clicked="toggleItemSelection()"
     @grid-ready="onGridReady"
   >
   </ag-grid-vue>
@@ -20,11 +23,13 @@
 
 <script>
 import { AgGridVue } from "ag-grid-vue3"; // the AG Grid Vue Component
-import { reactive, onMounted, ref } from "vue";
-
+import { reactive, ref } from "vue";
+import axios from "axios";
+// CSS
 import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
-import { saveSelections } from "../utilities/indexedDB-helper";
+// IndexedDB-helper
+import { saveSelections, getSelections } from "../utilities/indexedDB-helper";
 
 export default {
   name: "App",
@@ -53,18 +58,13 @@ export default {
       flex: 1,
     };
 
-    // Load data from sever
-    onMounted(() => {
-      fetch("http://localhost:5555/data")
-        .then((result) => result.json())
-        .then((remoteRowData) => (rowData.value = remoteRowData));
-    });
-
     return {
       // Version Change
       version: 0,
       changedLocation: "nowhere",
+      //   IndexedDB Data
       selection: [],
+      myJson: {},
       //   Grid Data
       onGridReady,
       columnDefs,
@@ -74,17 +74,9 @@ export default {
   },
 
   methods: {
-    async cellWasClicked(e) {
-      const cellValue = e.value;
-      this.selection.push(cellValue);
-      await saveSelections(this.selection);
-      this.updateVersion();
-
-      console.log("cell was clicked", e.value);
-    },
-
-    deselectRows() {
-      gridApi.value.deselectAll();
+    openIt() {
+      const url = "new_url";
+      window.open(url);
     },
 
     updateVersion() {
@@ -105,8 +97,59 @@ export default {
 
       return data?.version;
     },
+
+    async fetchData() {
+      try {
+        const res = await fetch("http://localhost:5555/data")
+          .then((result) => result.json())
+          .then((remoteRowData) => (this.rowData.value = remoteRowData));
+        this.myJson = res;
+        console.log("response", res);
+      } catch (e) {
+        console.log("ERROR", e);
+      }
+      console.log("myJson", this.myJson);
+    },
+
+    // async cellWasClicked(e) {
+    //   let cellValue = e.value;
+    //   this.selection.push(cellValue);
+    //   await saveSelections(this.selection);
+    //   this.updateVersion();
+    //   console.log("cell value - ", e.value);
+
+    //   this.toggleItemSelection();
+    // },
+
+    createSelectionObject() {
+      this.selection = this.myJson.map((item) => {
+        console.log({ id: item.id });
+        return { id: item.id, selected: false };
+      });
+    },
+
+    async toggleItemSelection(id) {
+      const foundItem = this.selection.find((item) => item.id === id);
+      foundItem.selected = !foundItem.selected;
+      await saveSelections(this.selection);
+      this.updateVersion();
+    },
+
+    isActive(id) {
+      const foundItem = this.selection.find((item) => item.id === id);
+      return foundItem.selected;
+    },
+
+    deselectRows() {
+      gridApi.value.deselectAll();
+    },
   },
-  mounted() {
+
+  async mounted() {
+    await this.fetchData();
+
+    this.createSelectionObject();
+
     if (this.getVersion() == null) {
       this.updateVersion();
     }
@@ -134,4 +177,8 @@ export default {
 };
 </script>
 
-<style lang="scss"></style>
+<style lang="scss">
+.active {
+  background-color: red;
+}
+</style>
