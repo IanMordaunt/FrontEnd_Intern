@@ -1,3 +1,5 @@
+
+
 <template>
   <div>
     <button @click="openIt()">New Window</button>
@@ -15,7 +17,7 @@
     :defaultColDef="defaultColDef"
     rowSelection="multiple"
     animateRows="true"
-    @cell-clicked="toggleItemSelection()"
+    @cell-clicked="toggleItemSelection"
     @grid-ready="onGridReady"
   >
   </ag-grid-vue>
@@ -104,7 +106,7 @@ export default {
           .then((result) => result.json())
           .then((remoteRowData) => (this.rowData.value = remoteRowData));
         this.myJson = res;
-        console.log("response", res);
+        // console.log("response", res);
       } catch (e) {
         console.log("ERROR", e);
       }
@@ -128,7 +130,9 @@ export default {
       });
     },
 
-    async toggleItemSelection(id) {
+    async toggleItemSelection(event) {
+        console.log('event', event)
+        const id = event.data.id
       const foundItem = this.selection.find((item) => item.id === id);
       foundItem.selected = !foundItem.selected;
       await saveSelections(this.selection);
@@ -148,7 +152,7 @@ export default {
   async mounted() {
     await this.fetchData();
 
-    this.createSelectionObject();
+    // this.createSelectionObject();
 
     if (this.getVersion() == null) {
       this.updateVersion();
@@ -159,7 +163,11 @@ export default {
     const updateSelection = async () => {
       try {
         const newSelection = await getSelections();
-        this.selection = newSelection.selectionList;
+        if(!newSelection.length){
+            this.createSelectionObject()
+        } else {
+            this.selection = newSelection.selectionList;
+        }
       } catch (e) {
         console.log("ERROR", e);
       }
