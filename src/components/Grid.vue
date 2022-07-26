@@ -1,12 +1,10 @@
-
-
 <template>
   <button @click="deselectRows">deselect rows</button>
   <ag-grid-vue
     class="ag-theme-alpine"
     style="height: 500px"
     :columnDefs="columnDefs.value"
-    :rowData="rowData.value" 
+    :rowData="rowData.value"
     :defaultColDef="defaultColDef"
     rowSelection="multiple"
     animateRows="true"
@@ -27,6 +25,7 @@ import { saveSelections, getSelections } from "../utilities/indexedDB-helper";
 
 export default {
   name: "App",
+//   emits:['selection-changed'],
   components: {
     AgGridVue,
   },
@@ -36,6 +35,7 @@ export default {
     // Obtain API from grid's onGridReady event
     const onGridReady = (params) => {
       gridApi.value = params.api;
+      updateSelection();
     };
 
     const rowData = reactive({}); // Set rowData to Array of Objects, one Object per Row
@@ -50,11 +50,28 @@ export default {
       sortable: true,
       filter: true,
       flex: 1,
-    };
+    },
+
+
+    // const toggleItemSelection = (event) => {
+    //   console.log("event", event);
+    //   const id = event.data.id;
+    //   emit("selection-changed", id);
+
+    // },
+
+    function updateSelection() {
+      gridApi.value.forEachNode(function (node) {
+        const foundItem = props.selection.find((item) => item.id === node.data.id);
+          node.setSelected(foundItem.selected);
+      });
+    }
 
     onMounted(() => {
-      console.log('props', props.gridData)
-      rowData.value = props.gridData
+      console.log("props", props.gridData);
+      rowData.value = props.gridData;
+      console.log(props.selection)
+
     });
 
     return {
@@ -70,29 +87,20 @@ export default {
   props: {
     gridData: {
       type: Array,
-      required: true
-    }
+      required: true,
+    },
+    selection: {
+      type: Array,
+      required: true,
+    },
   },
 
   methods: {
-
-    async toggleItemSelection(event) {
-        console.log('event', event)
-        const id = event.data.id
-        this.$emit('selection-changed', id)
-      // const foundItem = this.selection.find((item) => item.id === id);
-      // foundItem.selected = !foundItem.selected;
-      // await saveSelections(this.selection);
-      // this.updateVersion();
-    },
 
     deselectRows() {
       gridApi.value.deselectAll();
     },
   },
-  mounted() {
-    // console.log('grid api', gridApi)
-  }
 };
 </script>
 

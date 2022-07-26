@@ -47,14 +47,12 @@ export default {
         this.myJson = res.data;
       } catch (e) {
         console.log("error", e);
-      } finally {
-        this.loaded = true
       }
     },
 
     fetchColumns(){
 
-    }
+    },
 
     createSelectionObject() {
       this.selection = this.myJson.map((item) => {
@@ -63,7 +61,7 @@ export default {
       });
     },
 
-    async toggleItemSelection(id) {
+    async gridSelectionChanged(id) {
       const foundItem = this.selection.find((item) => item.id === id);
       foundItem.selected = !foundItem.selected;
       await saveSelections(this.selection);
@@ -75,9 +73,6 @@ export default {
       return foundItem.selected;
     },
 
-    gridSelectionChanged(id){
-      console.log('this changed', id)
-    }
   },
 
   async mounted() {
@@ -91,16 +86,23 @@ export default {
 
     this.version = this.getVersion();
 
-    const updateSelection = async () => {
+     const updateSelection = async () => {
       try {
         const newSelection = await getSelections();
-        this.selection = newSelection.selectionList;
+        if(!newSelection?.selectionList.length){
+            this.createSelectionObject()
+        } else {
+            this.selection = newSelection.selectionList;
+        }
       } catch (e) {
         console.log("ERROR", e);
       }
     };
 
-    updateSelection()
+    await updateSelection()
+
+
+    this.loaded = true
 
     window.onstorage = async () => {
       console.log("VERSION CHANGED");
@@ -135,7 +137,7 @@ export default {
       <Grid
         v-if="loaded"
         :gridData="myJson"
-        :gridColumn=""
+        :selection="selection"
         @selection-changed="gridSelectionChanged"
       />
     </div>
