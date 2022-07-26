@@ -25,11 +25,11 @@ import { saveSelections, getSelections } from "../utilities/indexedDB-helper";
 
 export default {
   name: "App",
-//   emits:['selection-changed'],
+  emits:['selection-changed'],
   components: {
     AgGridVue,
   },
-  setup(props) {
+  setup(props, {emit}) {
     const gridApi = ref(null); // Optional - for accessing Grid's API
 
     // Obtain API from grid's onGridReady event
@@ -50,22 +50,21 @@ export default {
       sortable: true,
       filter: true,
       flex: 1,
-    },
+    };
 
+    const toggleItemSelection = (event) => {
+      console.log("event", event);
+      const id = event.data.id;
+      emit("selection-changed", id);
 
-    // const toggleItemSelection = (event) => {
-    //   console.log("event", event);
-    //   const id = event.data.id;
-    //   emit("selection-changed", id);
+    };
 
-    // },
-
-    function updateSelection() {
+    const updateSelection = () => {
       gridApi.value.forEachNode(function (node) {
         const foundItem = props.selection.find((item) => item.id === node.data.id);
           node.setSelected(foundItem.selected);
       });
-    }
+    };
 
     onMounted(() => {
       console.log("props", props.gridData);
@@ -81,6 +80,7 @@ export default {
       columnDefs,
       rowData,
       defaultColDef,
+      toggleItemSelection
     };
   },
 
