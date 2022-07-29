@@ -11,6 +11,7 @@ export default {
       selection: [],
       version: 0,
       changedLocation: "nowhere",
+      hidegrid: false
     };
   },
 
@@ -23,8 +24,9 @@ export default {
 
   methods: {
     openIt() {
-      const url = "new_url";
+      const url = "?name=spreadsheet_only";
       window.open(url);
+      this.hidegrid = true
     },
 
     updateVersion() {
@@ -65,21 +67,15 @@ export default {
     async gridSelectionChanged(selectedRowIds) {
 
       this.selection.forEach((item) => {
-        item.selected = selectedRowIds.includes(item.id)
-        
-      })
-
-      console.log('grid selection changed', this.selection)
-
+        if(selectedRowIds.includes(item.id)){
+          item.selected = true
+        } else {
+          item.selected = false
+        }
+        // item.selected = selectedRowIds.includes(item.id);
+      });
       await saveSelections(this.selection);
-
       this.updateVersion();
-    },
-
-    updateSelectionDB(id) {
-      const currentSelection = this.selection.map((item) => item.id === id);
-      // console.log(currentSelection)
-      // console.log(this.selection)
     },
 
     isActive(id) {
@@ -100,7 +96,7 @@ export default {
 
     this.version = this.getVersion();
 
-    //  step 4 - does selection object exist in IndexDB?
+    //  step 4 - does selection object exist in IndexedDB?
     const updateSelection = async () => {
       try {
         const newSelection = await getSelections();
@@ -108,7 +104,7 @@ export default {
         if (!newSelection?.selectionList.length) {
           this.createSelectionObject();
         } else {
-          // 4b - 
+          // 4b - YES - update local variable in IndexedDB
           this.selection = newSelection.selectionList;
         }
       } catch (e) {
@@ -119,6 +115,11 @@ export default {
     await updateSelection();
 
     this.loaded = true;
+
+    //check url
+    const url = new URLSearchParams(location.search)
+    const urlName = url.get('name')
+    console.log('url name', urlName)
 
     window.onstorage = async () => {
       console.log("VERSION CHANGED");
@@ -154,7 +155,6 @@ export default {
         v-if="loaded"
         :gridData="myJson"
         :selection="selection"
-        @update-selection="updateSelectionDB"
         @selection-changed="gridSelectionChanged"
       />
     </div>

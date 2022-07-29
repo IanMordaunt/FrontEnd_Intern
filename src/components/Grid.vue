@@ -16,12 +16,10 @@
 
 <script>
 import { AgGridVue } from "ag-grid-vue3"; // the AG Grid Vue Component
-import { reactive, ref, onMounted } from "vue";
+import { reactive, ref, onMounted, watch } from "vue";
 // CSS
 import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
-// IndexedDB-helper
-import { saveSelections, getSelections } from "../utilities/indexedDB-helper";
 
 export default {
   name: "App",
@@ -52,29 +50,38 @@ export default {
       flex: 1,
     };
 
-    const selectionChanged = (event) => {
-      const selectedNodes = gridApi.value.getSelectedNodes();
-      const selectedRowIds = selectedNodes.map((item) => item.data.id)
-      emit("selection-changed", selectedRowIds);
+     const deselectRows = () => {
+      gridApi.value.deselectAll();
     };
 
-
+// Gets ids from the selected rows and pass them to parent component
+    const selectionChanged = (event) => {
+      const selectedNodes = gridApi.value.getSelectedNodes();
+      const selectedRowIds = selectedNodes.map((item) => item.data.id);
+      emit("selection-changed", selectedRowIds);
+    };
+// Using props.selection from the parent component, 
+// find the row id in the grid that matches the row id 
+// in indexedDB that has the selected value = true,
+// then set that matching row in the grid to selected
     const updateSelection = () => {
       gridApi.value.forEachNode(function (node) {
         const foundItem = props.selection.find(
           (item) => item.id === node.data.id
         );
-        node.setSelected(foundItem.selected); 
-
+        node.setSelected(foundItem.selected);
       });
     };
+
+    watch(() => props.selection, (newSelection) => {
+        updateSelection();
+        console.log('selection changed', newSelection)
+    })
 
     onMounted(() => {
       console.log("props", props.gridData);
       rowData.value = props.gridData;
       console.log(props.selection);
-      
-
     });
 
     return {
@@ -85,6 +92,7 @@ export default {
       rowData,
       defaultColDef,
       selectionChanged,
+      deselectRows
     };
   },
 
@@ -96,13 +104,11 @@ export default {
     selection: {
       type: Array,
       required: true,
-    }
+    },
   },
 
   methods: {
-    deselectRows() {
-      gridApi.value.deselectAll();
-    },
+   
   },
 };
 </script>
