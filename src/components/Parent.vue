@@ -2,9 +2,8 @@
 import axios from "axios";
 import Grid from "./Grid.vue";
 import { saveSelections, getSelections } from "../utilities/indexedDB-helper";
-
 export default {
-  components: {Grid},
+  components: { Grid },
   data() {
     return {
       loaded: false,
@@ -13,6 +12,13 @@ export default {
       version: 0,
       changedLocation: "nowhere",
     };
+  },
+
+  props: {
+    gridSelection: {
+      type: Array,
+      reuqired: true,
+    },
   },
 
   methods: {
@@ -35,24 +41,19 @@ export default {
     getVersion() {
       const unparsedJson = localStorage.getItem("version");
       const data = JSON.parse(unparsedJson);
-      console.log("get version", data);
-
       return data?.version;
     },
 
     async fetchData() {
       try {
         const res = await axios.get("http://localhost:5555/data");
-        console.log("response", res.data);
         this.myJson = res.data;
       } catch (e) {
         console.log("error", e);
       }
     },
 
-    fetchColumns(){
-
-    },
+    fetchColumns() {},
 
     createSelectionObject() {
       this.selection = this.myJson.map((item) => {
@@ -61,54 +62,70 @@ export default {
       });
     },
 
-    async gridSelectionChanged(id) {
-      const foundItem = this.selection.find((item) => item.id === id);
-      foundItem.selected = !foundItem.selected;
+    async gridSelectionChanged(selectedRowIds) {
+
+      this.selection.forEach((item) => {
+        item.selected = selectedRowIds.includes(item.id)
+        
+      })
+
+      console.log('grid selection changed', this.selection)
+
       await saveSelections(this.selection);
+
       this.updateVersion();
+    },
+
+    updateSelectionDB(id) {
+      const currentSelection = this.selection.map((item) => item.id === id);
+      // console.log(currentSelection)
+      // console.log(this.selection)
     },
 
     isActive(id) {
       const foundItem = this.selection.find((item) => item.id === id);
       return foundItem.selected;
     },
-
   },
 
+  // step 1 - mount component
   async mounted() {
+    // step 2 - get data from backend
     await this.fetchData();
 
-    // this.createSelectionObject();
-
+    // step 3 - if no version exists then update it
     if (this.getVersion() == null) {
       this.updateVersion();
     }
 
     this.version = this.getVersion();
 
-     const updateSelection = async () => {
+    //  step 4 - does selection object exist in IndexDB?
+    const updateSelection = async () => {
       try {
         const newSelection = await getSelections();
-        if(!newSelection?.selectionList.length){
-            this.createSelectionObject()
+        // 4a - NO - create selection
+        if (!newSelection?.selectionList.length) {
+          this.createSelectionObject();
         } else {
-            this.selection = newSelection.selectionList;
+          // 4b - 
+          this.selection = newSelection.selectionList;
         }
       } catch (e) {
         console.log("ERROR", e);
       }
     };
 
-    await updateSelection()
+    await updateSelection();
 
-
-    this.loaded = true
+    this.loaded = true;
 
     window.onstorage = async () => {
       console.log("VERSION CHANGED");
       this.changedLocation = "there";
       this.version = this.getVersion();
-      updateSelection()
+      updateSelection();
+      console.log(this.selectionUpdate);
     };
   },
 };
@@ -116,7 +133,6 @@ export default {
 
 <template>
   <div class="parent-wrapper">
-
     <div class="left-side">
       <div>
         <button @click="openIt()">New Window</button>
@@ -138,10 +154,10 @@ export default {
         v-if="loaded"
         :gridData="myJson"
         :selection="selection"
+        @update-selection="updateSelectionDB"
         @selection-changed="gridSelectionChanged"
       />
     </div>
-
   </div>
 </template>
 
@@ -150,11 +166,11 @@ export default {
   background-color: red;
 }
 
-.parent-wrapper{
+.parent-wrapper {
   display: flex;
 }
 
-.right-side{
-  flex:1
+.right-side {
+  flex: 1;
 }
 </style>

@@ -8,7 +8,7 @@
     :defaultColDef="defaultColDef"
     rowSelection="multiple"
     animateRows="true"
-    @cell-clicked="toggleItemSelection"
+    @cell-clicked="selectionChanged"
     @grid-ready="onGridReady"
   >
   </ag-grid-vue>
@@ -25,11 +25,11 @@ import { saveSelections, getSelections } from "../utilities/indexedDB-helper";
 
 export default {
   name: "App",
-  emits:['selection-changed'],
+  emits: ["selection-changed", "update-selection"],
   components: {
     AgGridVue,
   },
-  setup(props, {emit}) {
+  setup(props, { emit }) {
     const gridApi = ref(null); // Optional - for accessing Grid's API
 
     // Obtain API from grid's onGridReady event
@@ -52,24 +52,28 @@ export default {
       flex: 1,
     };
 
-    const toggleItemSelection = (event) => {
-      console.log("event", event);
-      const id = event.data.id;
-      emit("selection-changed", id);
-
+    const selectionChanged = (event) => {
+      const selectedNodes = gridApi.value.getSelectedNodes();
+      const selectedRowIds = selectedNodes.map((item) => item.data.id)
+      emit("selection-changed", selectedRowIds);
     };
+
 
     const updateSelection = () => {
       gridApi.value.forEachNode(function (node) {
-        const foundItem = props.selection.find((item) => item.id === node.data.id);
-          node.setSelected(foundItem.selected);
+        const foundItem = props.selection.find(
+          (item) => item.id === node.data.id
+        );
+        node.setSelected(foundItem.selected); 
+
       });
     };
 
     onMounted(() => {
       console.log("props", props.gridData);
       rowData.value = props.gridData;
-      console.log(props.selection)
+      console.log(props.selection);
+      
 
     });
 
@@ -80,7 +84,7 @@ export default {
       columnDefs,
       rowData,
       defaultColDef,
-      toggleItemSelection
+      selectionChanged,
     };
   },
 
@@ -92,11 +96,10 @@ export default {
     selection: {
       type: Array,
       required: true,
-    },
+    }
   },
 
   methods: {
-
     deselectRows() {
       gridApi.value.deselectAll();
     },
