@@ -12,37 +12,15 @@ export default {
       selection: [],
       version: 0,
       changedLocation: "nowhere",
-      // hidegrid: false,
+      showgrid: true,
     };
-  },
-
-  props: {
-    gridSelection: {
-      type: Array,
-      required: true,
-    },
   },
 
   methods: {
     openIt() {
       const url = "?name=spreadsheet_only";
-      window.open(url);
-      // this.hidegrid = true;
-    },
-
-    hideGrid() {
-      const r_s = document.getElementById("right-side");
-      if (r_s.style.display === "block") {
-        r_s.style.display = "none";
-      } else {
-        r_s.style.display = "none";
-      }
-      const newWindowBtn = document.getElementById("newWindowBtn");
-      if (newWindowBtn.style.display === "block") {
-        newWindowBtn.style.display = "none";
-      } else {
-        newWindowBtn.style.display = "none";
-      }
+      window.open(url, "_black", "toolbar=0, location=0, menubar=0");
+      this.showgrid = false;
     },
 
     updateVersion() {
@@ -150,7 +128,6 @@ export default {
 <template>
   <div class="parent-wrapper">
     <div class="left-side">
-     
       <p>
         updated version: <strong>{{ this.changedLocation }}</strong>
       </p>
@@ -164,13 +141,18 @@ export default {
     </div>
 
     <div class="right-side" id="right-side">
-        <button id="newWindowBtn" @click="openIt(); hideGrid();"><font-awesome-icon icon="fa-solid fa-arrow-up-right-from-square" /></button>
-      <Grid
-        v-if="loaded"
-        :gridData="myJson"
-        :selection="selection"
-        @selection-changed="gridSelectionChanged"
-      />
+      <div v-show="loaded && showgrid">
+        <!-- <button id="newWindowBtn" @click="openIt()">
+          <font-awesome-icon icon="fa-solid fa-arrow-up-right-from-square" />
+        </button> -->
+
+        <Grid
+          v-if="loaded"
+          :gridData="myJson"
+          :selection="selection"
+          @selection-changed="gridSelectionChanged"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -190,7 +172,6 @@ export default {
 }
 
 .newWindowBtn {
-  display: flex;
-  display: "block";
+  margin-bottom: 0;
 }
 </style>
