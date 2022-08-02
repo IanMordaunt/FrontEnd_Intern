@@ -2,6 +2,7 @@
 import axios from "axios";
 import Grid from "./Grid.vue";
 import { saveSelections, getSelections } from "../utilities/indexedDB-helper";
+
 export default {
   components: { Grid },
   data() {
@@ -11,14 +12,14 @@ export default {
       selection: [],
       version: 0,
       changedLocation: "nowhere",
-      hidegrid: false
+      // hidegrid: false,
     };
   },
 
   props: {
     gridSelection: {
       type: Array,
-      reuqired: true,
+      required: true,
     },
   },
 
@@ -26,7 +27,22 @@ export default {
     openIt() {
       const url = "?name=spreadsheet_only";
       window.open(url);
-      this.hidegrid = true
+      // this.hidegrid = true;
+    },
+
+    hideGrid() {
+      const r_s = document.getElementById("right-side");
+      if (r_s.style.display === "block") {
+        r_s.style.display = "none";
+      } else {
+        r_s.style.display = "none";
+      }
+      const newWindowBtn = document.getElementById("newWindowBtn");
+      if (newWindowBtn.style.display === "block") {
+        newWindowBtn.style.display = "none";
+      } else {
+        newWindowBtn.style.display = "none";
+      }
     },
 
     updateVersion() {
@@ -65,12 +81,11 @@ export default {
     },
 
     async gridSelectionChanged(selectedRowIds) {
-
       this.selection.forEach((item) => {
-        if(selectedRowIds.includes(item.id)){
-          item.selected = true
+        if (selectedRowIds.includes(item.id)) {
+          item.selected = true;
         } else {
-          item.selected = false
+          item.selected = false;
         }
         // item.selected = selectedRowIds.includes(item.id);
       });
@@ -117,9 +132,9 @@ export default {
     this.loaded = true;
 
     //check url
-    const url = new URLSearchParams(location.search)
-    const urlName = url.get('name')
-    console.log('url name', urlName)
+    const url = new URLSearchParams(location.search);
+    const urlName = url.get("name");
+    console.log("url name", urlName);
 
     window.onstorage = async () => {
       console.log("VERSION CHANGED");
@@ -135,9 +150,7 @@ export default {
 <template>
   <div class="parent-wrapper">
     <div class="left-side">
-      <div>
-        <button @click="openIt()">New Window</button>
-      </div>
+     
       <p>
         updated version: <strong>{{ this.changedLocation }}</strong>
       </p>
@@ -150,7 +163,8 @@ export default {
       </div>
     </div>
 
-    <div class="right-side">
+    <div class="right-side" id="right-side">
+        <button id="newWindowBtn" @click="openIt(); hideGrid();"><font-awesome-icon icon="fa-solid fa-arrow-up-right-from-square" /></button>
       <Grid
         v-if="loaded"
         :gridData="myJson"
@@ -172,5 +186,11 @@ export default {
 
 .right-side {
   flex: 1;
+  display: "block";
+}
+
+.newWindowBtn {
+  display: flex;
+  display: "block";
 }
 </style>
