@@ -1,21 +1,26 @@
 <script>
 import axios from "axios";
+import Grid from "./Grid.vue";
 import { saveSelections, getSelections } from "../utilities/indexedDB-helper";
 
 export default {
+  components: { Grid },
   data() {
     return {
-      myJson: {},
+      loaded: false,
+      myJson: [],
       selection: [],
       version: 0,
       changedLocation: "nowhere",
+      showgrid: true,
     };
   },
 
   methods: {
-    openIt() {
-      const url = "new_url";
-      window.open(url);
+    openSecondaryWindow() {
+      const url = "?name=spreadsheet_only";
+      window.open(url, "_black", "toolbar=0, location=0, menubar=0");
+      // this.showgrid = false;
     },
 
     updateVersion() {
@@ -32,20 +37,19 @@ export default {
     getVersion() {
       const unparsedJson = localStorage.getItem("version");
       const data = JSON.parse(unparsedJson);
-      console.log("get version", data);
-
       return data?.version;
     },
 
     async fetchData() {
       try {
         const res = await axios.get("http://localhost:5555/data");
-        console.log("response", res.data);
         this.myJson = res.data;
       } catch (e) {
         console.log("error", e);
       }
     },
+
+    fetchColumns() {},
 
     createSelectionObject() {
       this.selection = this.myJson.map((item) => {
@@ -54,9 +58,10 @@ export default {
       });
     },
 
-    async toggleItemSelection(id) {
-      const foundItem = this.selection.find((item) => item.id === id);
-      foundItem.selected = !foundItem.selected;
+    async gridSelectionChanged(selectedRowIds) {
+      this.selection.forEach((item) => {
+        item.selected = selectedRowIds.includes(item.id);
+      });
       await saveSelections(this.selection);
       this.updateVersion();
     },
@@ -67,71 +72,101 @@ export default {
     },
   },
 
+  // step 1 - mount component
   async mounted() {
+    // step 2 - get data from backend
     await this.fetchData();
 
-    this.createSelectionObject();
-
+    // step 3 - if no version exists then update it
     if (this.getVersion() == null) {
       this.updateVersion();
     }
 
     this.version = this.getVersion();
 
+    //  step 4 - does selection object exist in IndexedDB?
     const updateSelection = async () => {
       try {
         const newSelection = await getSelections();
-        this.selection = newSelection.selectionList;
+        // 4a - NO - create selection
+        if (!newSelection?.selectionList.length) {
+          this.createSelectionObject();
+        } else {
+          // 4b - YES - update local variable in IndexedDB
+          this.selection = newSelection.selectionList;
+        }
       } catch (e) {
         console.log("ERROR", e);
       }
     };
 
-    updateSelection()
+    await updateSelection();
+    // this mounts the Grid.vue component with v-if
+    this.loaded = true;
+
+    //check url
+    const url = new URLSearchParams(location.search);
+    const urlName = url.get("name");
+    console.log("url name", urlName);
 
     window.onstorage = async () => {
       console.log("VERSION CHANGED");
       this.changedLocation = "there";
       this.version = this.getVersion();
-      updateSelection()
+      updateSelection();
+      console.log(this.selectionUpdate);
     };
   },
 };
 </script>
 
 <template>
-  <div>
-    <button @click="openIt()">New Window</button>
-  </div>
-  <p>
-    updated version: <strong>{{ this.changedLocation }}</strong>
-  </p>
-  <div>
-    <ul>
-      <li v-for="(item, index) in myJson" :key="index">
-        {{ item.id }} - {{ item.text }}
-      </li>
-    </ul>
-  </div>
+  <div class="parent-wrapper">
+    <div class="left-side">
+      <p>
+        updated version: <strong>{{ this.changedLocation }}</strong>
+      </p>
+      <div>
+        <ul>
+          <li v-for="(item, index) in myJson" :key="index">
+            {{ item.id }} - {{ item.text }}
+          </li>
+        </ul>
+      </div>
+    </div>
 
-  <div>
-    <ul>
-      <li v-for="(item, index) in selection" :key="index">
-        <button
-          class=""
-          type="button"
-          @click="toggleItemSelection(item.id)"
-          :class="{ active: isActive(item.id) }"
-        >
-          {{ item.id }}
+    <div class="right-side" id="right-side">
+      <div v-show="loaded && showgrid">
+        <button id="newWindowBtn" @click="openSecondaryWindow()">
+          <font-awesome-icon icon="fa-solid fa-arrow-up-right-from-square" />
         </button>
-      </li>
-    </ul>
+
+        <Grid
+          v-if="loaded"
+          :gridData="myJson"
+          :selection="selection"
+          @selection-changed="gridSelectionChanged"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
 <style>
 .active {
   background-color: red;
+}
+
+.parent-wrapper {
+  display: flex;
+}
+
+.right-side {
+  flex: 1;
+  display: "block";
+}
+
+.newWindowBtn {
+  margin-bottom: 0;
 }
 </style>

@@ -1,24 +1,13 @@
 <script setup>
-import Parent from './components/Parent.vue'
-// import Child from './components/Child.vue'
+import Parent from "./components/Parent.vue";
 </script>
 
 <template>
-  <header>
-
-    <div class="wrapper">
-      <Parent />
-      <!-- <Child /> -->
-    </div>
-  </header>
-
-  <main>
-
-  </main>
+   <Parent />
 </template>
 
 <style>
-@import './assets/base.css';
+@import "./assets/base.css";
 
 #app {
   max-width: 1280px;
@@ -51,17 +40,6 @@ a,
 }
 
 @media (min-width: 1024px) {
-  body {
-    display: flex;
-    place-items: center;
-  }
-
-  #app {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    padding: 0 2rem;
-  }
-
   header {
     display: flex;
     place-items: center;
