@@ -18,7 +18,7 @@ export default {
 
   methods: {
     openSecondaryWindow() {
-      const url = "?name=spreadsheet_only";
+      const url = "spreadsheet_only";
       window.open(url, "_black", "toolbar=0, location=0, menubar=0");
       // this.showgrid = false;
     },

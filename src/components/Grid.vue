@@ -17,6 +17,7 @@
 <script>
 import { AgGridVue } from "ag-grid-vue3"; // the AG Grid Vue Component
 import { reactive, ref, onMounted, watch } from "vue";
+import { getSelections } from "../utilities/indexedDB-helper";
 // CSS
 import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
@@ -60,13 +61,14 @@ export default {
       const selectedRowIds = selectedNodes.map((item) => item.data.id);
       emit("selection-changed", selectedRowIds);
     };
-    // Using props.selection from the parent component,
+    // Fetching the data from IndexedDB,
     // find the row id in the grid that matches the row id
     // in indexedDB that has the selected value = true,
     // then set that matching row in the grid to selected
-    const updateSelection = () => {
+    const updateSelection = async () => {
+      const indexedDBSelections = await getSelections();
       gridApi.value.forEachNode(function (node) {
-        const foundItem = props.selection.find(
+        const foundItem = indexedDBSelections.selectionList.find(
           (item) => item.id === node.data.id
         );
         node.setSelected(foundItem.selected);
@@ -112,6 +114,4 @@ export default {
 };
 </script>
 
-<style lang="scss">
-
-</style>
+<style lang="scss"></style>
