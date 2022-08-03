@@ -20,7 +20,7 @@ export default {
     openSecondaryWindow() {
       const url = "?name=spreadsheet_only";
       window.open(url, "_black", "toolbar=0, location=0, menubar=0");
-      this.showgrid = false;
+      // this.showgrid = false;
     },
 
     updateVersion() {
@@ -60,12 +60,7 @@ export default {
 
     async gridSelectionChanged(selectedRowIds) {
       this.selection.forEach((item) => {
-        if (selectedRowIds.includes(item.id)) {
-          item.selected = true;
-        } else {
-          item.selected = false;
-        }
-        // item.selected = selectedRowIds.includes(item.id);
+        item.selected = selectedRowIds.includes(item.id);
       });
       await saveSelections(this.selection);
       this.updateVersion();
@@ -106,7 +101,7 @@ export default {
     };
 
     await updateSelection();
-
+    // this mounts the Grid.vue component with v-if
     this.loaded = true;
 
     //check url
