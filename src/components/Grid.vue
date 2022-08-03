@@ -109,13 +109,9 @@ export default {
       required: true,
     },
   },
-
-  methods: {},
 };
 </script>
 
 <style lang="scss">
-.active {
-  background-color: red;
-}
+
 </style>

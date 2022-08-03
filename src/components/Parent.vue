@@ -17,7 +17,7 @@ export default {
   },
 
   methods: {
-    openIt() {
+    openSecondaryWindow() {
       const url = "?name=spreadsheet_only";
       window.open(url, "_black", "toolbar=0, location=0, menubar=0");
       this.showgrid = false;
@@ -142,9 +142,9 @@ export default {
 
     <div class="right-side" id="right-side">
       <div v-show="loaded && showgrid">
-        <!-- <button id="newWindowBtn" @click="openIt()">
+        <button id="newWindowBtn" @click="openSecondaryWindow()">
           <font-awesome-icon icon="fa-solid fa-arrow-up-right-from-square" />
-        </button> -->
+        </button>
 
         <Grid
           v-if="loaded"

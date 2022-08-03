@@ -1,7 +1,7 @@
 // Create IndexedDB - Set DB-Name and DB-Version
 const DB_NAME = "stateManager";
 const DB_VERSION = 10;
-const SESSION_ID = "blahblah";
+const SESSION_ID = "testSession";
 const TABLE_NAME = "selections";
 let DB;
 
