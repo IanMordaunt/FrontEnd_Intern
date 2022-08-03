@@ -66,9 +66,8 @@ export default {
     // in indexedDB that has the selected value = true,
     // then set that matching row in the grid to selected
     const updateSelection = async () => {
-      const indexedDBSelections = await getSelections();
       gridApi.value.forEachNode(function (node) {
-        const foundItem = indexedDBSelections.selectionList.find(
+        const foundItem = props.selection.find(
           (item) => item.id === node.data.id
         );
         node.setSelected(foundItem.selected);

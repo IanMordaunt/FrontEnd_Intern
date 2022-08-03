@@ -1,7 +1,16 @@
 <script>
 import axios from "axios";
 import Grid from "./Grid.vue";
-import { saveSelections, getSelections } from "../utilities/indexedDB-helper";
+import { saveSelections, getSelections, saveData, getData } from "../utilities/indexedDB-helper";
+
+const SPREADSHEET_URL = "spreadsheet_only"
+
+const isSecondaryWindow = () => {
+  const url = new URLSearchParams(location.search);
+  const urlName = url.get("name");
+  console.log("url name", urlName);
+  return urlName === SPREADSHEET_URL
+}
 
 export default {
   components: { Grid },
@@ -18,7 +27,7 @@ export default {
 
   methods: {
     openSecondaryWindow() {
-      const url = "spreadsheet_only";
+      const url = `?name=${SPREADSHEET_URL}`;
       window.open(url, "_black", "toolbar=0, location=0, menubar=0");
       // this.showgrid = false;
     },
@@ -74,8 +83,16 @@ export default {
 
   // step 1 - mount component
   async mounted() {
-    // step 2 - get data from backend
-    await this.fetchData();
+    // step 2 - get data
+    if(isSecondaryWindow()){
+      // fetch data from indexedDB
+      getData()
+    } else {
+      // this is Primary Window - fetch data from database
+      await this.fetchData();
+      // save myJson into IndexedDB
+      saveData(this.myJson)
+    }
 
     // step 3 - if no version exists then update it
     if (this.getVersion() == null) {
@@ -105,9 +122,7 @@ export default {
     this.loaded = true;
 
     //check url
-    const url = new URLSearchParams(location.search);
-    const urlName = url.get("name");
-    console.log("url name", urlName);
+
 
     window.onstorage = async () => {
       console.log("VERSION CHANGED");
