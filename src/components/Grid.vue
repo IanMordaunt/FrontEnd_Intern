@@ -83,9 +83,7 @@ export default {
     );
 
     onMounted(() => {
-      console.log("props", props.gridData);
       rowData.value = props.gridData;
-      console.log(props.selection);
     });
 
     return {

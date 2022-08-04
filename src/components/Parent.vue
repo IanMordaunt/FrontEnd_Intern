@@ -86,7 +86,8 @@ export default {
     // step 2 - get data
     if(isSecondaryWindow()){
       // fetch data from indexedDB
-      getData()
+    const indexedDBData = await getData()
+    this.myJson = indexedDBData.selectionList
     } else {
       // this is Primary Window - fetch data from database
       await this.fetchData();
@@ -125,11 +126,9 @@ export default {
 
 
     window.onstorage = async () => {
-      console.log("VERSION CHANGED");
       this.changedLocation = "there";
       this.version = this.getVersion();
       updateSelection();
-      console.log(this.selectionUpdate);
     };
   },
 };

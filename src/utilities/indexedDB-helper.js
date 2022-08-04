@@ -1,7 +1,6 @@
 // Create IndexedDB - Set DB-Name and DB-Version
 const DB_NAME = "stateManager";
 const DB_VERSION = 10;
-const DATA_DB_VERSION = 11;
 const SESSION_ID = "selectionSession";
 const DATA_SESSION_ID = "dataSession";
 const SELECTION_TABLE_NAME = "selections";
@@ -133,6 +132,7 @@ export const getData = async () => {
       request.onsuccess = (event) => {
         data = event.target.result ?? data;
         resolve(data);
+        console.log("DATA", data)
       };
 
       // close db when request is complete
