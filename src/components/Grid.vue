@@ -60,9 +60,13 @@ export default {
       const selectedRowIds = selectedNodes.map((item) => item.data.id);
       emit("selection-changed", selectedRowIds);
     };
-    // Using props.selection from the parent component
+    
     // Fetching the data from IndexedDB,
-  
+    
+    // Using props.selection from the parent component,
+    // find the row id in the grid that matches the row id
+    // in indexedDB that has the selected value = true,
+    // then set that matching row in the grid to selected
     const updateSelection = () => {
       gridApi.value.forEachNode(function (node) {
         const foundItem = props.selection.find(
