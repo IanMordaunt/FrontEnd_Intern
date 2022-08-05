@@ -87,7 +87,8 @@ export default {
     if(isSecondaryWindow()){
       // fetch data from indexedDB
     const indexedDBData = await getData()
-    this.myJson = indexedDBData.selectionList
+    this.myJson = indexedDBData.dataList
+    
     } else {
       // this is Primary Window - fetch data from database
       await this.fetchData();

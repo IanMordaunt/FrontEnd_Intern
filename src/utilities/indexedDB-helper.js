@@ -36,7 +36,7 @@ export const getDb = async () =>
         db.deleteObjectStore(DATA_TABLE_NAME);
       } catch {}
       db.createObjectStore(SELECTION_TABLE_NAME, { keyPath: "selectionId" });
-      db.createObjectStore(DATA_TABLE_NAME, { keyPath: "selectionId" });
+      db.createObjectStore(DATA_TABLE_NAME, { keyPath: "dataId" });
     };
   });
 
@@ -66,13 +66,13 @@ export const saveSelections = async (newSelections) => {
 };
 
 // Save API Data to indexedDB api_data table
-export const saveData = async (newSelections) => {
+export const saveData = async (newData) => {
   const db = await getDb();
   return new Promise(async (resolve, reject) => {
     try {
       const note = {
-        selectionId: DATA_SESSION_ID,
-        selectionList: JSON.parse(JSON.stringify(newSelections)),
+        dataId: DATA_SESSION_ID,
+        dataList: JSON.parse(JSON.stringify(newData)),
       };
 
       const trans = db.transaction(DATA_TABLE_NAME, "readwrite");
