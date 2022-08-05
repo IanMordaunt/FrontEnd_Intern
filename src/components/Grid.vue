@@ -60,6 +60,9 @@ export default {
       const selectedRowIds = selectedNodes.map((item) => item.data.id);
       emit("selection-changed", selectedRowIds);
     };
+    
+    // Fetching the data from IndexedDB,
+    
     // Using props.selection from the parent component,
     // find the row id in the grid that matches the row id
     // in indexedDB that has the selected value = true,
@@ -82,9 +85,7 @@ export default {
     );
 
     onMounted(() => {
-      console.log("props", props.gridData);
       rowData.value = props.gridData;
-      console.log(props.selection);
     });
 
     return {
@@ -112,6 +113,4 @@ export default {
 };
 </script>
 
-<style lang="scss">
-
-</style>
+<style lang="scss"></style>
