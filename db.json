@@ -3,7 +3,8 @@
     {
       "id": 1,
       "title": "title1",
-      "text": "Bio"
+      "text": "Bio",
+      "comment": "grid-col-test"
     },
     {
       "id": 2,

@@ -1,19 +1,25 @@
 <script>
 import axios from "axios";
 import Grid from "./Grid.vue";
-import { saveSelections, getSelections, saveData, getData } from "../utilities/indexedDB-helper";
+import {
+  saveSelections,
+  getSelections,
+  saveData,
+  getData,
+} from "../utilities/indexedDB-helper";
 
-const SPREADSHEET_URL = "spreadsheet_only"
+const SPREADSHEET_URL = "spreadsheet_only";
 
 const isSecondaryWindow = () => {
   const url = new URLSearchParams(location.search);
   const urlName = url.get("name");
   console.log("url name", urlName);
-  return urlName === SPREADSHEET_URL
-}
+  return urlName === SPREADSHEET_URL;
+};
 
 export default {
   components: { Grid },
+
   data() {
     return {
       loaded: false,
@@ -21,9 +27,17 @@ export default {
       selection: [],
       version: 0,
       changedLocation: "nowhere",
+      gridColumn: [],
       showgrid: true,
     };
   },
+
+  // props: {
+  //   gridColumn: {
+  //     type: Array,
+  //     required: true,
+  //   },
+  // },
 
   methods: {
     openSecondaryWindow() {
@@ -58,7 +72,15 @@ export default {
       }
     },
 
-    fetchColumns() {},
+    fetchColumns() {
+     const keysArray = (Object.keys(this.myJson[0]));
+     this.gridColumn = keysArray.map((item) => {
+      return {field: item}
+     })
+      console.log(this.gridColumn)
+      console.log(this.myJson)
+
+    },
 
     createSelectionObject() {
       this.selection = this.myJson.map((item) => {
@@ -84,16 +106,17 @@ export default {
   // step 1 - mount component
   async mounted() {
     // step 2 - get data
-    if(isSecondaryWindow()){
+    if (isSecondaryWindow()) {
       // fetch data from indexedDB
-    const indexedDBData = await getData()
-    this.myJson = indexedDBData.dataList
-    
+      const indexedDBData = await getData();
+      this.myJson = indexedDBData.dataList;
     } else {
       // this is Primary Window - fetch data from database
       await this.fetchData();
+      this.fetchColumns();
+
       // save myJson into IndexedDB
-      saveData(this.myJson)
+      saveData(this.myJson);
     }
 
     // step 3 - if no version exists then update it
@@ -124,7 +147,6 @@ export default {
     this.loaded = true;
 
     //check url
-
 
     window.onstorage = async () => {
       this.changedLocation = "there";
@@ -158,6 +180,7 @@ export default {
 
         <Grid
           v-if="loaded"
+          :gridColumn="gridColumn"
           :gridData="myJson"
           :selection="selection"
           @selection-changed="gridSelectionChanged"
