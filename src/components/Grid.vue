@@ -40,7 +40,7 @@ export default {
 
     // Each Column Definition results in one Column.
     const columnDefs = reactive({
-      value: props.gridColumn,
+      value: props.gridColumns,
     });
 
     // DefaultColDef sets props common to all Columns
@@ -86,7 +86,7 @@ export default {
 
     onMounted(() => {
       rowData.value = props.gridData;
-      // columnDefs.value = props.gridColumn;
+      columnDefs.value = props.gridColumns;
     });
 
     return {
@@ -110,7 +110,7 @@ export default {
       type: Array,
       required: true,
     },
-    gridColumn: {
+    gridColumns: {
       type: Array,
       required: true
     },

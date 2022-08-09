@@ -23,11 +23,11 @@ export default {
   data() {
     return {
       loaded: false,
-      myJson: [],
+      gridData: [],
       selection: [],
       version: 0,
       changedLocation: "nowhere",
-      gridColumn: [],
+      gridColumns: [],
       showgrid: true,
     };
   },
@@ -66,25 +66,25 @@ export default {
     async fetchData() {
       try {
         const res = await axios.get("http://localhost:5555/data");
-        this.myJson = res.data;
+        this.gridData = res.data;
       } catch (e) {
         console.log("error", e);
       }
     },
 
     fetchColumns() {
-     const keysArray = (Object.keys(this.myJson[0]));
-     this.gridColumn = keysArray.map((item) => {
-      return {field: item}
-     })
-      console.log(this.gridColumn)
-      console.log(this.myJson)
-
+      const keysArray = this.gridData.map((item) => Object.keys(item)).flat();
+      const uniqueKeys = [...new Set(keysArray)];
+      this.gridColumns = uniqueKeys.map((item) => {
+        return {field: item}
+      });
+      console.log(this.gridColumns);
+    
     },
 
     createSelectionObject() {
-      this.selection = this.myJson.map((item) => {
-        console.log({ id: item.id });
+      this.selection = this.gridData.map((item) => {
+        // console.log({ id: item.id });
         return { id: item.id, selected: false };
       });
     },
@@ -109,14 +109,14 @@ export default {
     if (isSecondaryWindow()) {
       // fetch data from indexedDB
       const indexedDBData = await getData();
-      this.myJson = indexedDBData.dataList;
+      this.gridData = indexedDBData.dataList;
     } else {
       // this is Primary Window - fetch data from database
       await this.fetchData();
       this.fetchColumns();
 
-      // save myJson into IndexedDB
-      saveData(this.myJson);
+      // save gridData into IndexedDB
+      saveData(this.gridData);
     }
 
     // step 3 - if no version exists then update it
@@ -165,7 +165,7 @@ export default {
       </p>
       <div>
         <ul>
-          <li v-for="(item, index) in myJson" :key="index">
+          <li v-for="(item, index) in gridData" :key="index">
             {{ item.id }} - {{ item.text }}
           </li>
         </ul>
@@ -180,8 +180,8 @@ export default {
 
         <Grid
           v-if="loaded"
-          :gridColumn="gridColumn"
-          :gridData="myJson"
+          :gridColumns="gridColumns"
+          :gridData="gridData"
           :selection="selection"
           @selection-changed="gridSelectionChanged"
         />
