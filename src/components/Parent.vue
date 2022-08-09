@@ -1,29 +1,43 @@
 <script>
 import axios from "axios";
 import Grid from "./Grid.vue";
-import { saveSelections, getSelections, saveData, getData } from "../utilities/indexedDB-helper";
+import {
+  saveSelections,
+  getSelections,
+  saveData,
+  getData,
+} from "../utilities/indexedDB-helper";
 
-const SPREADSHEET_URL = "spreadsheet_only"
+const SPREADSHEET_URL = "spreadsheet_only";
 
 const isSecondaryWindow = () => {
   const url = new URLSearchParams(location.search);
   const urlName = url.get("name");
   console.log("url name", urlName);
-  return urlName === SPREADSHEET_URL
-}
+  return urlName === SPREADSHEET_URL;
+};
 
 export default {
   components: { Grid },
+
   data() {
     return {
       loaded: false,
-      myJson: [],
+      gridData: [],
       selection: [],
       version: 0,
       changedLocation: "nowhere",
+      gridColumns: [],
       showgrid: true,
     };
   },
+
+  // props: {
+  //   gridColumn: {
+  //     type: Array,
+  //     required: true,
+  //   },
+  // },
 
   methods: {
     openSecondaryWindow() {
@@ -52,17 +66,25 @@ export default {
     async fetchData() {
       try {
         const res = await axios.get("http://localhost:5555/data");
-        this.myJson = res.data;
+        this.gridData = res.data;
       } catch (e) {
         console.log("error", e);
       }
     },
 
-    fetchColumns() {},
+    fetchColumns() {
+      const keysArray = this.gridData.map((item) => Object.keys(item)).flat();
+      const uniqueKeys = [...new Set(keysArray)];
+      this.gridColumns = uniqueKeys.map((item) => {
+        return {field: item}
+      });
+      console.log(this.gridColumns);
+    
+    },
 
     createSelectionObject() {
-      this.selection = this.myJson.map((item) => {
-        console.log({ id: item.id });
+      this.selection = this.gridData.map((item) => {
+        // console.log({ id: item.id });
         return { id: item.id, selected: false };
       });
     },
@@ -84,16 +106,17 @@ export default {
   // step 1 - mount component
   async mounted() {
     // step 2 - get data
-    if(isSecondaryWindow()){
+    if (isSecondaryWindow()) {
       // fetch data from indexedDB
-    const indexedDBData = await getData()
-    this.myJson = indexedDBData.dataList
-    
+      const indexedDBData = await getData();
+      this.gridData = indexedDBData.dataList;
     } else {
       // this is Primary Window - fetch data from database
       await this.fetchData();
-      // save myJson into IndexedDB
-      saveData(this.myJson)
+      this.fetchColumns();
+
+      // save gridData into IndexedDB
+      saveData(this.gridData);
     }
 
     // step 3 - if no version exists then update it
@@ -125,7 +148,6 @@ export default {
 
     //check url
 
-
     window.onstorage = async () => {
       this.changedLocation = "there";
       this.version = this.getVersion();
@@ -143,7 +165,7 @@ export default {
       </p>
       <div>
         <ul>
-          <li v-for="(item, index) in myJson" :key="index">
+          <li v-for="(item, index) in gridData" :key="index">
             {{ item.id }} - {{ item.text }}
           </li>
         </ul>
@@ -158,7 +180,8 @@ export default {
 
         <Grid
           v-if="loaded"
-          :gridData="myJson"
+          :gridColumns="gridColumns"
+          :gridData="gridData"
           :selection="selection"
           @selection-changed="gridSelectionChanged"
         />
