@@ -87,6 +87,7 @@ export default {
     onMounted(() => {
       rowData.value = props.gridData;
       columnDefs.value = props.gridColumns;
+      console.log(props.gridColumns)
     });
 
     return {
