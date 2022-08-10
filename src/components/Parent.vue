@@ -42,7 +42,7 @@ export default {
   methods: {
     openSecondaryWindow() {
       const url = `?name=${SPREADSHEET_URL}`;
-      window.open(url, "_black", "toolbar=0, location=0, menubar=0");
+      window.open(url, "_blank", "toolbar=0, location=0, menubar=0");
       // this.showgrid = false;
     },
 
@@ -113,17 +113,19 @@ export default {
     } else {
       // this is Primary Window - fetch data from database
       await this.fetchData();
-      this.fetchColumns();
+     
 
       // save gridData into IndexedDB
-      saveData(this.gridData);
+      await saveData(this.gridData);
     }
+
+    this.fetchColumns();
 
     // step 3 - if no version exists then update it
     if (this.getVersion() == null) {
       this.updateVersion();
     }
-
+     
     this.version = this.getVersion();
 
     //  step 4 - does selection object exist in IndexedDB?
@@ -131,7 +133,7 @@ export default {
       try {
         const newSelection = await getSelections();
         // 4a - NO - create selection
-        if (!newSelection?.selectionList.length) {
+        if (!newSelection?.selectionList?.length) {
           this.createSelectionObject();
         } else {
           // 4b - YES - update local variable in IndexedDB

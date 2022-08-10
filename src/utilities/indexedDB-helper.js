@@ -1,6 +1,6 @@
 // Create IndexedDB - Set DB-Name and DB-Version
 const DB_NAME = "stateManager";
-const DB_VERSION = 10;
+const DB_VERSION = 12;
 const SESSION_ID = "selectionSession";
 const DATA_SESSION_ID = "dataSession";
 const SELECTION_TABLE_NAME = "selections";
@@ -8,7 +8,7 @@ const DATA_TABLE_NAME = "api_data";
 let DB;
 
 // Creation of IndexedDB with 2 database stores, "selections" and "api_data"
-export const getDb = async () =>
+const getDb = async () =>
   new Promise((resolve, reject) => {
     if (DB) {
       resolve(DB);
@@ -40,6 +40,9 @@ export const getDb = async () =>
     };
   });
 
+  // const tableName = async () => {
+  //   if ()
+  // }
 
 // Save new selections to selection array in indexedDB selections table
 export const saveSelections = async (newSelections) => {
@@ -132,7 +135,7 @@ export const getData = async () => {
       request.onsuccess = (event) => {
         data = event.target.result ?? data;
         resolve(data);
-        console.log("DATA", data)
+        console.log("DATA", data);
       };
 
       // close db when request is complete
