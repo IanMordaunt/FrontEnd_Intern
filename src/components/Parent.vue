@@ -1,6 +1,8 @@
 <script>
 import axios from "axios";
 import Grid from "./Grid.vue";
+// import Plot from "./Plot.vue";
+import ScatterPlot from "./ScatterPlot.vue";
 import {
   saveSelections,
   getSelections,
@@ -18,7 +20,7 @@ const isSecondaryWindow = () => {
 };
 
 export default {
-  components: { Grid },
+  components: { Grid, ScatterPlot },
 
   data() {
     return {
@@ -29,15 +31,9 @@ export default {
       changedLocation: "nowhere",
       gridColumns: [],
       showgrid: true,
+      showplot: true,
     };
   },
-
-  // props: {
-  //   gridColumn: {
-  //     type: Array,
-  //     required: true,
-  //   },
-  // },
 
   methods: {
     openSecondaryWindow() {
@@ -76,10 +72,9 @@ export default {
       const keysArray = this.gridData.map((item) => Object.keys(item)).flat();
       const uniqueKeys = [...new Set(keysArray)];
       this.gridColumns = uniqueKeys.map((item) => {
-        return {field: item}
+
+        return { field: item };
       });
-      console.log(this.gridColumns);
-    
     },
 
     createSelectionObject() {
@@ -97,15 +92,20 @@ export default {
       this.updateVersion();
     },
 
-    isActive(id) {
-      const foundItem = this.selection.find((item) => item.id === id);
-      return foundItem.selected;
+  async plotSelectionChanged(selectedPointsIds) {
+      this.selection.forEach((item) => {
+        item.selected = selectedPointsIds.includes(item.id);
+      });
+      await saveSelections(this.selection);
+      this.updateVersion();
     },
   },
 
   // step 1 - mount component
   async mounted() {
     // step 2 - get data
+
+    //check url
     if (isSecondaryWindow()) {
       // fetch data from indexedDB
       const indexedDBData = await getData();
@@ -113,7 +113,6 @@ export default {
     } else {
       // this is Primary Window - fetch data from database
       await this.fetchData();
-     
 
       // save gridData into IndexedDB
       await saveData(this.gridData);
@@ -125,7 +124,7 @@ export default {
     if (this.getVersion() == null) {
       this.updateVersion();
     }
-     
+
     this.version = this.getVersion();
 
     //  step 4 - does selection object exist in IndexedDB?
@@ -148,8 +147,7 @@ export default {
     // this mounts the Grid.vue component with v-if
     this.loaded = true;
 
-    //check url
-
+    // local storage listener
     window.onstorage = async () => {
       this.changedLocation = "there";
       this.version = this.getVersion();
@@ -168,7 +166,7 @@ export default {
       <div>
         <ul>
           <li v-for="(item, index) in gridData" :key="index">
-            {{ item.id }} - {{ item.text }}
+            {{ item.x }} - {{ item.y }}
           </li>
         </ul>
       </div>
@@ -186,24 +184,33 @@ export default {
           :gridData="gridData"
           :selection="selection"
           @selection-changed="gridSelectionChanged"
+
         />
+      </div>
+    </div>
+    <div class="plot" id="plot">
+      <div>
+        <ScatterPlot
+        :gridData="gridData"
+        @points-changed="plotSelectionChanged"
+         />
       </div>
     </div>
   </div>
 </template>
 
 <style>
-.active {
-  background-color: red;
-}
-
 .parent-wrapper {
   display: flex;
 }
 
+.plot{
+  flex: 2;
+  display: block;
+}
 .right-side {
   flex: 1;
-  display: "block";
+  display: block;
 }
 
 .newWindowBtn {

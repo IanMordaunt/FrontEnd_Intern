@@ -2,44 +2,44 @@
   "data": [
     {
       "id": 1,
-      "title": "title1",
-      "text": "Bio",
+      "x": 2,
+      "y": 4,
       "comment": "grid-col-test"
     },
     {
       "id": 2,
-      "title": "title3",
-      "text": "test3"
+      "x": 4,
+      "y": 6
     },
     {
       "id": 3,
-      "title": "title3",
-      "text": "test3"
+      "x": 6,
+      "y": 8
     },
     {
       "id": 4,
-      "title": "title4",
-      "text": "Calc"
+      "x": 8,
+      "y": 10
     },
     {
       "id": 5,
-      "title": "title5",
-      "text": "Dev"
+      "x": 8,
+      "y": 12
     },
     {
       "id": 6,
-      "title": "title6",
-      "text": "BioChem"
+      "x": 10,
+      "y": 14
     },
     {
       "id": 7,
-      "title": "title7",
-      "text": "Blue"
+      "x": 12,
+      "y": 16
     },
     {
       "id": 8,
-      "title": "title8",
-      "text": "Test Data"
+      "x": 14,
+      "y": 18
     }
   ]
 }

@@ -1,6 +1,6 @@
 // Create IndexedDB - Set DB-Name and DB-Version
 const DB_NAME = "stateManager";
-const DB_VERSION = 12;
+const DB_VERSION = 15;
 const SESSION_ID = "selectionSession";
 const DATA_SESSION_ID = "dataSession";
 const SELECTION_TABLE_NAME = "selections";
@@ -40,9 +40,9 @@ const getDb = async () =>
     };
   });
 
-  // const tableName = async () => {
-  //   if ()
-  // }
+  // const tableName = async (saveSelections) => {
+  //   return ( saveSelections ? SELECTION_TABLE_NAME : DATA_TABLE_NAME);
+  // };
 
 // Save new selections to selection array in indexedDB selections table
 export const saveSelections = async (newSelections) => {
