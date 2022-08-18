@@ -40,25 +40,24 @@ export default {
     var colorX = "#ffa7b5";
     var colorY = "#fdae61";
 
-
+// Array of X-key: values
     const xAxisData = this.gridData.map((item) => item.x).flat();
-
     console.log("DATA-X:VALUES", xAxisData);
 
+// Array of Y-key: values
     const yAxisData = this.gridData.map((item) => item.y).flat();
     console.log("DATA-Y:VALUES", yAxisData);
 
+// Array of id-key: values
     const dataIds = this.gridData.map((item) => item.id).flat();
+    const idsArray = dataIds.toString().split(",")
 
     // this.selectedPointsIds = dataIds;
     console.log("DATA-ID:VALUES", dataIds);
-    console.log(this.selectedPointsIds);
-    console.log(this.gridData);
+    console.log(idsArray)
 
-    var ids = dataIds
-
+    var ids = idsArray;
     var x = xAxisData;
-
     var y = yAxisData;
 
     Plotly.newPlot(
@@ -67,10 +66,10 @@ export default {
         {
           type: "scatter",
           mode: "markers",
-          x: x,
+          x: x, 
           y: y,
           ids: ids,
-          xaxis: "x",
+          xaxis: "x", 
           yaxis: "y",
           name: "random data",
           marker: { color: color1, size: 10 },
@@ -137,15 +136,17 @@ export default {
 
       eventData.points.forEach(function (pt) {
         pointAxis.push([pt.ids, pt.x, pt.y]);
+        ids.push(pt.ids)
         x.push(pt.x);
         y.push(pt.y);
+        
         colors[pt.pointNumber] = color1;
       });
 
       Plotly.restyle(
         TESTER,
         {
-          x: [ids, x, y],
+          x: [x, y],
           xbins: {},
         },
         [1, 2]
