@@ -86,8 +86,8 @@ export default {
     async childSelectionChanged(selectedIds) {
       this.selection.forEach((item) => {
         item.selected = selectedIds.includes(item.id);
-
       });
+      this.selection = JSON.parse(JSON.stringify(this.selection))
       await saveSelections(this.selection);
       this.updateVersion();
     },
@@ -194,6 +194,7 @@ export default {
         <ScatterPlot
           v-if="loaded"
           :gridData="gridData"
+          :selection="selection"
           @points-changed="plotSelectionChanged"
         />
       </div>

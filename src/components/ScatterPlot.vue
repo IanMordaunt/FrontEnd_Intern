@@ -1,5 +1,6 @@
 <script>
 import Plotly from "plotly.js-dist";
+import { watch } from "vue";
 
 export default {
   name: "App",
@@ -10,6 +11,7 @@ export default {
       pointSelection: [],
       pointIds: [],
       selectedPointsIds: [],
+      selectedPoints: [],
     };
   },
 
@@ -20,15 +22,20 @@ export default {
       type: Array,
       required: true,
     },
+
+    selection: {
+      type: Array,
+      required: true,
+    },
   },
 
-  setup(props, { emit }) {
-    const plotSelection = (event) => {
-      const pointsArray = this.pointSelection;
-      const selectedPointsIds = pointsArray.map((item) => item.id);
-      console.log(selectedPointsIds);
-      emit("points-changed", selectedPointsIds);
-    };
+  setup(props) {
+    watch(
+      () => props.selection,
+      (newSelection) => {
+        console.log("selection changed PLOT", newSelection);
+      }
+    );
   },
 
   async mounted() {
@@ -72,8 +79,8 @@ export default {
     );
 
     const pointsSelected = (selectedIds) => {
-      this.$emit("points-changed", selectedIds)
-      console.log(selectedIds);
+      this.$emit("points-changed", selectedIds);
+      // console.log(selectedIds);
     };
 
     TESTER.on("plotly_selected", function (eventData) {
@@ -87,9 +94,29 @@ export default {
         colors[pt.pointNumber] = color1;
       });
 
-      Plotly.restyle(TESTER, "marker.color", [colors], [0]);
-    });
+      this.selectedPoints.points.forEach(function (pt) {
+        colors[pt.pointNumber] = color1;
+      })
 
+      const updateData = () => {
+        const selectedIds = this.selection.filter((item) => item.selected).map((item) => item.id);
+        console.log("selected ids", selectedIds);
+
+        let selectedDataIdx = [];
+
+        this.gridData.forEach((item, index) => {
+          if (selectedIds.includes(item.id)) {
+            selectedDataIdx = [...selectedDataIdx, index];
+            console.log("FINAL", selectedDataIdx);
+            this.selectedPoints = selectedDataIdx;
+          }
+        });
+      };
+      
+      Plotly.restyle(TESTER, "marker.color", [colors], [0]);
+      updateData();
+    });
+   
     TESTER.on("plotly_deselect", function () {
       console.log("deselect");
     });
