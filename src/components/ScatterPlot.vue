@@ -65,14 +65,18 @@ export default {
       [
         {
           type: "scatter",
-          mode: "markers",
           x: x, 
           y: y,
           ids: ids,
+          mode: "markers",
           xaxis: "x", 
           yaxis: "y",
           name: "random data",
           marker: { color: color1, size: 10 },
+        //   transform: [{
+        //     type: 'groupby',
+        //     groups: ids,
+        //   }]
         },
         {
           type: "histogram",
@@ -125,10 +129,10 @@ export default {
       var ids = [];
       var x = [];
       var y = [];
-      this.pointSelection = [pointAxis];
+      this.pointSelection = pointAxis;
 
       console.log(this.pointSelection);
-      console.log(this.selectedPointsIds);
+      
 
       var colors = [];
       for (var i = 0; i < xAxisData && yAxisData; i++) colors.push(color1Light);

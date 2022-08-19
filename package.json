@@ -19,6 +19,8 @@
     "chart.js": "^3.9.1",
     "json-server": "^0.17.0",
     "localbase": "^0.7.5",
+    "plotly": "^1.0.6",
+    "plotly.js": "^2.14.0",
     "plotly.js-dist": "^2.14.0",
     "plotly.js-dist-min": "^2.14.0",
     "vue": "^3.2.36",
