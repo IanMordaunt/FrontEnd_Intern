@@ -72,7 +72,6 @@ export default {
       const keysArray = this.gridData.map((item) => Object.keys(item)).flat();
       const uniqueKeys = [...new Set(keysArray)];
       this.gridColumns = uniqueKeys.map((item) => {
-
         return { field: item };
       });
     },
@@ -84,20 +83,23 @@ export default {
       });
     },
 
-    async gridSelectionChanged(selectedRowIds) {
+    async childSelectionChanged(selectedIds) {
       this.selection.forEach((item) => {
-        item.selected = selectedRowIds.includes(item.id);
+        item.selected = selectedIds.includes(item.id);
+
       });
       await saveSelections(this.selection);
       this.updateVersion();
     },
 
-  async plotSelectionChanged(selectedPointsIds) {
-      this.selection.forEach((item) => {
-        item.selected = selectedPointsIds.includes(item.id);
-      });
-      await saveSelections(this.selection);
-      this.updateVersion();
+    gridSelectionChanged(selectedRowIds) {
+      console.log("GRID SELECTION", selectedRowIds)
+      this.childSelectionChanged(selectedRowIds);
+    },
+
+    plotSelectionChanged(selectedPointsIds) {
+      console.log("PLOT SELECTION", selectedPointsIds)
+      this.childSelectionChanged(selectedPointsIds);
     },
   },
 
@@ -184,16 +186,16 @@ export default {
           :gridData="gridData"
           :selection="selection"
           @selection-changed="gridSelectionChanged"
-
         />
       </div>
     </div>
     <div class="plot" id="plot">
       <div>
         <ScatterPlot
-        :gridData="gridData"
-        @points-changed="plotSelectionChanged"
-         />
+          v-if="loaded"
+          :gridData="gridData"
+          @points-changed="plotSelectionChanged"
+        />
       </div>
     </div>
   </div>
@@ -204,7 +206,7 @@ export default {
   display: flex;
 }
 
-.plot{
+.plot {
   flex: 2;
   display: block;
 }
