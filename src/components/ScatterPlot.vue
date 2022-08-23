@@ -16,6 +16,8 @@ export default {
   },
 
   methods: {},
+    
+  
 
   props: {
     gridData: {
@@ -29,7 +31,9 @@ export default {
     },
   },
 
+  
   setup(props) {
+
     watch(
       () => props.selection,
       (newSelection) => {
@@ -38,6 +42,7 @@ export default {
     );
   },
 
+  
   async mounted() {
     const TESTER = document.getElementById("graph");
 
@@ -53,6 +58,25 @@ export default {
     // Array of id-key: values
     const dataIds = this.gridData.map((item) => item.id).flat();
 
+    // Capture id of selected row in Grid
+    const updateData = () => {
+      const selectedIds = this.selection
+        .filter((item) => item.selected)
+        .map((item) => item.id);
+
+      let selectedDataIdx = [];
+
+    // Capture the index of the selected row id
+      this.gridData.forEach((item, index) => {
+        if (selectedIds.includes(item.id)) {
+          selectedDataIdx = [...selectedDataIdx, index];
+          this.selectedPointsIds = selectedDataIdx;
+          console.log("FINAL", this.selectedPointsIds);
+        }
+      });
+    };
+    updateData();
+
     Plotly.newPlot(
       TESTER,
       [
@@ -60,12 +84,29 @@ export default {
           type: "scatter",
           x: xAxisData,
           y: yAxisData,
+          selectedpoints: this.selectedPointsIds,
           ids: dataIds,
           mode: "markers",
           xaxis: "x",
           yaxis: "y",
           name: "random data",
-          marker: { color: color1, size: 10 },
+          mode: "markers",
+          selected: {
+            marker: {
+              color: "#ff0000",
+              opacity: 0.8,
+            },
+          },
+          unselected: {
+            marker: {
+              color: "#00ff00",
+              opacity: 0.5,
+            },
+          },
+          marker: {
+            size: 16,
+            color: "green",
+          },
         },
       ],
       {
@@ -80,7 +121,6 @@ export default {
 
     const pointsSelected = (selectedIds) => {
       this.$emit("points-changed", selectedIds);
-      // console.log(selectedIds);
     };
 
     TESTER.on("plotly_selected", function (eventData) {
@@ -94,29 +134,9 @@ export default {
         colors[pt.pointNumber] = color1;
       });
 
-      this.selectedPoints.points.forEach(function (pt) {
-        colors[pt.pointNumber] = color1;
-      })
-
-      const updateData = () => {
-        const selectedIds = this.selection.filter((item) => item.selected).map((item) => item.id);
-        console.log("selected ids", selectedIds);
-
-        let selectedDataIdx = [];
-
-        this.gridData.forEach((item, index) => {
-          if (selectedIds.includes(item.id)) {
-            selectedDataIdx = [...selectedDataIdx, index];
-            console.log("FINAL", selectedDataIdx);
-            this.selectedPoints = selectedDataIdx;
-          }
-        });
-      };
-      
       Plotly.restyle(TESTER, "marker.color", [colors], [0]);
-      updateData();
     });
-   
+
     TESTER.on("plotly_deselect", function () {
       console.log("deselect");
     });

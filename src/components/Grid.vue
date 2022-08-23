@@ -80,7 +80,6 @@ export default {
       () => props.selection,
       (newSelection) => {
         updateSelection();
-        console.log("selection changed", newSelection);
       }
     );
 

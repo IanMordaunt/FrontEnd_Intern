@@ -1,7 +1,6 @@
 <script>
 import axios from "axios";
 import Grid from "./Grid.vue";
-// import Plot from "./Plot.vue";
 import ScatterPlot from "./ScatterPlot.vue";
 import {
   saveSelections,
@@ -168,7 +167,7 @@ export default {
       <div>
         <ul>
           <li v-for="(item, index) in gridData" :key="index">
-            {{ item.x }} - {{ item.y }}
+           ({{item.id}}) : {{ item.x }} - {{ item.y }}
           </li>
         </ul>
       </div>
